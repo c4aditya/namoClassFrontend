@@ -26,7 +26,7 @@ const Signup = () => {
     <div className="auth-container">
       <div className="auth-card">
         <h2 className="auth-title">Create Account</h2>
-        <p className="auth-subtitle">Join Namo Class today</p>
+        <p className="auth-subtitle">Join Aviation Class today</p>
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
