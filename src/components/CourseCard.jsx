@@ -206,7 +206,7 @@ useEffect(() => {
 
         <div className="course-meta">
           <p>
-            <strong>Instructor:</strong> Anjali Gupta
+            
           </p>
           <p>
             <strong>Language:</strong> English , Hindi
