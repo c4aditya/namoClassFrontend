@@ -22,6 +22,12 @@ export const getAllUsers = () => API.get('/auth/users');
 export const updateUserDuration = (id, enrolledMonth) => API.put(`/auth/update-duration/${id}`, { enrolledMonth });
 export const deleteUser = (id) => API.delete(`/auth/delete-user/${id}`);
 
+// ✅ Pause / Resume All Classes
+export const pauseResumeCourses = (isPaused) =>
+    API.patch('/courses/pause-courses', { isPaused });
+
+
+
 // Course APIs
 export const getCourses = () => API.get('/courses/courses');
 export const trackProgress = (courseId) => API.post(`/courses/progress/${courseId}`);

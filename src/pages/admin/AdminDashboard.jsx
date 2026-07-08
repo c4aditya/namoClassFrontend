@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAdminStats } from '../../services/api';
+import { getAdminStats, pauseResumeCourses } from '../../services/api';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -9,6 +9,9 @@ const AdminDashboard = () => {
     oneMonthUsers: 0,
     twoMonthUsers: 0
   });
+
+  const [isPaused, setIsPaused] = useState(false);
+const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -21,6 +24,27 @@ const AdminDashboard = () => {
     };
     fetchStats();
   }, []);
+
+  const handlePauseResume = async () => {
+  try {
+    setLoading(true);
+
+    await pauseResumeCourses(!isPaused);
+
+    setIsPaused(!isPaused);
+
+    alert(
+      !isPaused
+        ? "All classes paused successfully."
+        : "All classes resumed successfully."
+    );
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const cards = [
     { title: 'Total Users', value: stats.totalUsers, color: '#3b82f6' },
@@ -71,6 +95,29 @@ const AdminDashboard = () => {
             <Link to="/admin/view-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
               View Total Users
             </Link>
+
+            <button
+  onClick={handlePauseResume}
+  disabled={loading}
+  className="btn"
+  style={{
+    background: isPaused ? "#16a34a" : "#dc2626",
+    color: "#fff",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer"
+  }}
+>
+  {loading
+    ? "Please Wait..."
+    : isPaused
+    ? "Resume All Classes"
+    : "Pause All Classes"}
+</button>
+
+           
           </div>
         </div>
       </div>
