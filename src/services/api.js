@@ -26,6 +26,8 @@ export const deleteUser = (id) => API.delete(`/auth/delete-user/${id}`);
 export const pauseResumeCourses = (isPaused) =>
     API.patch('/courses/pause-courses', { isPaused });
 
+export const getCoursePauseStatus = () =>
+    API.get('/courses/pause-courses');
 
 
 // Course APIs

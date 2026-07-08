@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getAdminStats, pauseResumeCourses } from '../../services/api';
+import {
+  getAdminStats,
+  pauseResumeCourses,
+  getCoursePauseStatus
+} from '../../services/api';
 import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
@@ -14,30 +18,39 @@ const AdminDashboard = () => {
 const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await getAdminStats();
-        setStats(data.stats);
-      } catch (error) {
-        console.error("Failed to fetch stats", error);
-      }
-    };
-    fetchStats();
-  }, []);
+  const fetchStats = async () => {
+    try {
+      const { data } = await getAdminStats();
+      setStats(data.stats);
 
-  const handlePauseResume = async () => {
+      // Get current pause status
+      const status = await getCoursePauseStatus();
+      setIsPaused(status.data.isCoursePaused);
+
+    } catch (error) {
+      console.error("Failed to fetch stats", error);
+    }
+  };
+
+  fetchStats();
+}, []); 
+
+const handlePauseResume = async () => {
   try {
     setLoading(true);
 
-    await pauseResumeCourses(!isPaused);
+    const newStatus = !isPaused;
 
-    setIsPaused(!isPaused);
+    await pauseResumeCourses(newStatus);
+
+    setIsPaused(newStatus);
 
     alert(
-      !isPaused
+      newStatus
         ? "All classes paused successfully."
         : "All classes resumed successfully."
     );
+
   } catch (error) {
     console.error(error);
     alert("Something went wrong.");
