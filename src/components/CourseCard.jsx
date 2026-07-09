@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { Plyr } from "plyr-react";
+import {Plyr} from "plyr-react";
 import "plyr-react/plyr.css";
 import { trackProgress } from "../services/api";
 
@@ -33,36 +33,64 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
 
   const videoId = course?.videoUrl ? getVideoId(course.videoUrl) : "";
 
-useEffect(() => {
-  if (isLocked || !videoId) return;
+  // useEffect(() => {
+  //   if (isLocked || !videoId) return;
 
-  const plyrInstance = plyrRef.current?.plyr;
-  if (!plyrInstance) return;
+  //   const plyrInstance = plyrRef.current?.plyr;
+  //   if (!plyrInstance) return;
 
-  const handlePlay = () => {
-    console.log("video paay button is clicked ")
-    trackProgress(course._id)
-      .then((res) => console.log("Tracked progress successfully:", res.data))
-      .catch((err) => console.error("Failed to track progress:", err));
+
+
+  //   // Use Plyr's event API if available
+  //   if (typeof plyrInstance.on === "function") {
+  //     plyrInstance.on('play', handlePlay);
+  //     return () => {
+  //       plyrInstance.off('play', handlePlay);
+  //     };
+  //   }
+
+  //   // Fallback to native video element event listeners
+  //   const videoEl = plyrInstance?.media?.target || plyrInstance?.element;
+  //   if (videoEl && typeof videoEl.addEventListener === "function") {
+  //     videoEl.addEventListener('play', handlePlay);
+  //     return () => {
+  //       videoEl.removeEventListener('play', handlePlay);
+  //     };
+  //   }
+  // }, [videoId, course._id, isLocked]);
+
+  const handlePlay = async () => {
+    console.log("Video Started");
+
+    try {
+      const res = await trackProgress(course._id);
+      console.log(res.data);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  // Use Plyr's event API if available
-  if (typeof plyrInstance.on === "function") {
-    plyrInstance.on('play', handlePlay);
-    return () => {
-      plyrInstance.off('play', handlePlay);
-    };
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        const player = plyrRef.current?.plyr;
 
-  // Fallback to native video element event listeners
-  const videoEl = plyrInstance?.media?.target || plyrInstance?.element;
-  if (videoEl && typeof videoEl.addEventListener === "function") {
-    videoEl.addEventListener('play', handlePlay);
-    return () => {
-      videoEl.removeEventListener('play', handlePlay);
-    };
-  }
-}, [videoId, course._id, isLocked]);
+        if (!player) {
+            console.log("Player not ready");
+            return;
+        }
+
+        console.log("Player Ready");
+
+        player.on("play", handlePlay);
+
+        return () => {
+            player.off("play", handlePlay);
+        };
+    }, 1000);
+
+    return () => clearTimeout(timer);
+}, []);
+
 
   const formatTime = (ms) => {
     if (ms <= 0) return "";
@@ -70,7 +98,7 @@ useEffect(() => {
     const hours = Math.floor(totalSecs / 3600);
     const minutes = Math.floor((totalSecs % 3600) / 60);
     const seconds = totalSecs % 60;
-    
+
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
@@ -149,10 +177,11 @@ useEffect(() => {
         {videoId ? (
           <>
             <Plyr
-              key={videoId}
-              ref={plyrRef}
               source={plyrSource}
               options={plyrOptions}
+              ref={plyrRef}
+              key={videoId}
+              onPlay={handlePlay}
             />
             {/* Transparent overlay to block clicks on YouTube title/channel/share */}
             <div className="video-protection-overlay"></div>
@@ -207,7 +236,7 @@ useEffect(() => {
 
         <div className="course-meta">
           <p>
-            
+
           </p>
           <p>
             <strong>Language:</strong> English , Hindi
