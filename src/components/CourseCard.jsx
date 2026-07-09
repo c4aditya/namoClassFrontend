@@ -40,6 +40,7 @@ useEffect(() => {
   if (!plyrInstance) return;
 
   const handlePlay = () => {
+    console.log("video paay button is clicked ")
     trackProgress(course._id)
       .then((res) => console.log("Tracked progress successfully:", res.data))
       .catch((err) => console.error("Failed to track progress:", err));
