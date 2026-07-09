@@ -52,8 +52,8 @@ const ViewUsers = () => {
   };
 
   // Filtered Users based on search
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -74,7 +74,7 @@ const ViewUsers = () => {
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
       <h1 className="dashboard-title">Total Users Directory</h1>
-      
+
       {/* Stats Summary cards */}
       <div className="course-grid" style={{ marginTop: '2rem', marginBottom: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
         <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1.25rem', borderRadius: '0.75rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)' }}>
@@ -113,6 +113,8 @@ const ViewUsers = () => {
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Signup Date</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Course Duration</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Progress Count</th>
+                <th style={{ padding: '1rem', textAlign: 'center' }}>Current Class</th>
+                <th style={{ padding: '1rem', textAlign: 'center' }}>Completed</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
@@ -134,9 +136,41 @@ const ViewUsers = () => {
                       <option value="2 months">2 Months</option>
                     </select>
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'center', fontWeight: 'bold', color: 'var(--primary)' }}>
+
+                  <td
+                    style={{
+                      padding: '1rem',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      color: 'var(--primary)'
+                    }}
+                  >
                     {user.watchedVideos ? user.watchedVideos.length : 0} videos
                   </td>
+
+                  <td
+                    style={{
+                      padding: '1rem',
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      color: user.currentClass === "Completed" ? "#16a34a" : "#2563eb"
+                    }}
+                  >
+                    {user.currentClass === "Completed"
+                      ? "🎉 Completed"
+                      : `Class ${user.currentClass}`}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: '1rem',
+                      textAlign: 'center',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {user.completedClasses} / {user.totalCourses}
+                  </td>
+
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                     <button
                       onClick={() => handleDelete(user._id)}
@@ -158,12 +192,12 @@ const ViewUsers = () => {
               ))}
             </tbody>
           </table>
-          
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '1rem', borderTop: '1px solid var(--border-gray)' }}>
-              <button 
-                onClick={handlePrevPage} 
+              <button
+                onClick={handlePrevPage}
                 disabled={currentPage === 1}
                 className="btn"
                 style={{ width: 'auto', padding: '0.4rem 0.8rem', background: currentPage === 1 ? '#e5e7eb' : '#f3f4f6', color: '#374151', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
@@ -173,8 +207,8 @@ const ViewUsers = () => {
               <span style={{ fontSize: '0.9rem' }}>
                 Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
               </span>
-              <button 
-                onClick={handleNextPage} 
+              <button
+                onClick={handleNextPage}
                 disabled={currentPage === totalPages}
                 className="btn"
                 style={{ width: 'auto', padding: '0.4rem 0.8rem', background: currentPage === totalPages ? '#e5e7eb' : '#f3f4f6', color: '#374151', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
