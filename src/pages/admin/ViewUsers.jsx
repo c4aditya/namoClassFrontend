@@ -124,8 +124,13 @@ const ViewUsers = () => {
                   <td style={{ padding: '1rem', fontWeight: 500 }}>{user.name}</td>
                   <td style={{ padding: '1rem', color: 'var(--text-gray)' }}>{user.email}</td>
                   <td style={{ padding: '1rem', fontSize: '0.85rem' }}>
-                    {new Date(user.createdAt).toLocaleString()}
-                  </td>
+                    <td style={{ padding: '1rem', fontSize: '0.85rem' }}>
+                      {new Date(user.createdAt).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })}
+                    </td>                  </td>
                   <td style={{ padding: '1rem' }}>
                     <select
                       value={user.enrolledMonth || '1 month'}
