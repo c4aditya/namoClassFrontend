@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
   getAdminStats,
   pauseResumeCourses,
-  getCoursePauseStatus
+  getCoursePauseStatus,
+  getApprovedPendingLoginUsers
 } from '../../services/api';
 import { Link } from 'react-router-dom';
 
@@ -15,7 +16,8 @@ const AdminDashboard = () => {
   });
 
   const [isPaused, setIsPaused] = useState(false);
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [pendingLoginUsers, setPendingLoginUsers] = useState([]);
 
   useEffect(() => {
   const fetchStats = async () => {
@@ -26,6 +28,10 @@ const [loading, setLoading] = useState(false);
       // Get current pause status
       const status = await getCoursePauseStatus();
       setIsPaused(status.data.isCoursePaused);
+
+      // Get approved pending login users
+      const pendingLoginData = await getApprovedPendingLoginUsers();
+      setPendingLoginUsers(pendingLoginData.data.users);
 
     } catch (error) {
       console.error("Failed to fetch stats", error);
@@ -83,6 +89,43 @@ const handlePauseResume = async () => {
             <p style={{ fontSize: '2.5rem', fontWeight: 800, marginTop: '0.5rem' }}>{card.value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Approved Users (Pending First Login) */}
+      <div className="course-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+        <h2 className="course-title" style={{ marginBottom: '1.5rem' }}>Approved Users (Pending First Login)</h2>
+        {pendingLoginUsers.length > 0 ? (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--border-gray)' }}>
+              <thead style={{ background: 'var(--secondary)', color: 'white' }}>
+                <tr>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Name</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Email</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Course Type</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left' }}>Approval Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingLoginUsers.map((user) => (
+                  <tr key={user._id} style={{ borderBottom: '1px solid var(--border-gray)' }}>
+                    <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>{user.name}</td>
+                    <td style={{ padding: '0.75rem 1rem', color: 'var(--text-gray)' }}>{user.email}</td>
+                    <td style={{ padding: '0.75rem 1rem' }}>{user.enrolledMonth || '1 month'}</td>
+                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--text-gray)' }}>
+                      {user.approvedAt ? new Date(user.approvedAt).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      }) : 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p style={{ color: 'var(--text-gray)' }}>No approved users pending login.</p>
+        )}
       </div>
 
       <div style={{ maxWidth: '600px' }}>

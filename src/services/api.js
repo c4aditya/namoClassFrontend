@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: 'https://api.aviation-courses.com/api',
+    baseURL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000/api'
+        : 'https://api.aviation-courses.com/api',
     withCredentials: true // Important for cookies
 });
 
@@ -15,6 +17,7 @@ export const logoutUser = () => API.post('/auth/logout');
 // Admin APIs
 export const getAdminStats = () => API.get('/auth/stats');
 export const getPendingUsers = () => API.get('/auth/pending-users');
+export const getApprovedPendingLoginUsers = () => API.get('/auth/approved-pending-login');
 export const approveUser = (id) => API.put(`/auth/approve/${id}`);
 export const createCourse = (formData) => API.post('/courses/create-course', formData);
 export const addUser = (formData) => API.post('/auth/add-user', formData);
