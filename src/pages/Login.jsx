@@ -75,7 +75,13 @@ const Login = () => {
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
+            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+              <Link to="/forgot-password" className="text-primary link" style={{ fontSize: '0.875rem' }}>
+                Forgot Password?
+              </Link>
+            </div>
           </div>
+
           <button
             type="submit"
             disabled={loading}

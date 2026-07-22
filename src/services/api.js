@@ -11,8 +11,11 @@ const API = axios.create({
 export const signup = (formData) => API.post('/auth/signup', formData);
 export const login = (formData) => API.post('/auth/login', formData);
 export const adminLogin = (formData) => API.post('/auth/admin-login', formData);
+export const forgotPassword = (data) => API.post('/auth/forgot-password', data);
+export const resetPassword = (data) => API.post('/auth/reset-password', data);
 export const getMe = () => API.get('/auth/me');
 export const logoutUser = () => API.post('/auth/logout');
+
 
 // Admin APIs
 export const getAdminStats = () => API.get('/auth/stats');

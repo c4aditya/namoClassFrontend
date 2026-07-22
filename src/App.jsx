@@ -6,7 +6,10 @@ import { loadUser } from './redux/authSlice';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
+
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -46,6 +49,9 @@ function App() {
                 : <Login />
             } />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+
             
             {/* User Routes */}
             <Route path="/dashboard" element={
