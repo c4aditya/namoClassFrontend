@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { getPendingUsers, approveUser } from '../../services/api';
+import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const ApproveUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   const fetchPending = async () => {
     try {
@@ -33,6 +35,14 @@ const ApproveUsers = () => {
 
   return (
     <div className="container" style={{ paddingTop: '2rem' }}>
+      {/* Admin Navigation Tabs */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
+        <Link to="/admin/view-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/view-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/view-users' ? '#fff' : '#475569' }}>Total Users</Link>
+        <Link to="/admin/approve-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/approve-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/approve-users' ? '#fff' : '#475569' }}>Approve Users</Link>
+        <Link to="/admin/pending-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/pending-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/pending-users' ? '#fff' : '#475569' }}>Pending Users</Link>
+        <Link to="/admin/deleted-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/deleted-users' ? '#dc2626' : '#f1f5f9', color: location.pathname === '/admin/deleted-users' ? '#fff' : '#475569' }}>Deleted Users</Link>
+      </div>
+
       <h1 className="dashboard-title">Approve Users</h1>
       
       {loading ? (

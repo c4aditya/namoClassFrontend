@@ -1,62 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, updateUserDuration, deleteUser } from '../../services/api';
+import { getDeletedUsers, permanentDeleteUser } from '../../services/api';
 import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-const ViewUsers = () => {
+const DeletedUsers = () => {
   const [users, setUsers] = useState([]);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [totalEnrolled, setTotalEnrolled] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
   const location = useLocation();
 
-  const fetchUsers = async () => {
+  const fetchDeletedUsers = async () => {
     try {
-      const { data } = await getAllUsers();
-      setUsers(data.users);
-      setTotalUsers(data.totalUsers);
-      setTotalEnrolled(data.totalEnrolledStudents);
+      setLoading(true);
+      const { data } = await getDeletedUsers();
+      setUsers(data.users || []);
     } catch (error) {
-      console.error("Failed to fetch users", error);
-      toast.error("Failed to fetch users");
+      console.error("Failed to fetch deleted users", error);
+      toast.error("Failed to fetch deleted users");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchDeletedUsers();
   }, []);
 
-  const handleDurationChange = async (userId, newDuration) => {
-    try {
-      const { data } = await updateUserDuration(userId, newDuration);
-      toast.success(data.message);
-      fetchUsers(); // Refresh list to reflect updated data
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update duration");
-    }
-  };
-
-  const handleDelete = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user? They will be moved to the Deleted Users tab.")) {
+  const handlePermanentDelete = async (userId, userName) => {
+    if (window.confirm(`Are you sure you want to PERMANENTLY delete user "${userName || 'this user'}"? This action cannot be undone and will completely remove their data.`)) {
       try {
-        const { data } = await deleteUser(userId);
-        toast.success(data.message || "User moved to Deleted Users");
-        fetchUsers(); // Refresh list
+        const { data } = await permanentDeleteUser(userId);
+        toast.success(data.message || "User permanently deleted");
+        fetchDeletedUsers();
       } catch (error) {
-        toast.error(error.response?.data?.message || "Failed to delete user");
+        toast.error(error.response?.data?.message || "Failed to permanently delete user");
       }
     }
   };
 
   // Filtered Users based on search
   const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Pagination Logic
@@ -75,7 +62,7 @@ const ViewUsers = () => {
 
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-      {/* Admin Navigation Tabs */}
+      {/* Admin Tabs Bar */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
         <Link to="/admin/view-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/view-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/view-users' ? '#fff' : '#475569' }}>Total Users</Link>
         <Link to="/admin/approve-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/approve-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/approve-users' ? '#fff' : '#475569' }}>Approve Users</Link>
@@ -83,47 +70,34 @@ const ViewUsers = () => {
         <Link to="/admin/deleted-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/deleted-users' ? '#dc2626' : '#f1f5f9', color: location.pathname === '/admin/deleted-users' ? '#fff' : '#475569' }}>Deleted Users</Link>
       </div>
 
-      <h1 className="dashboard-title">Total Users Directory</h1>
+      <h1 className="dashboard-title">Deleted Users Directory</h1>
 
-      {/* Stats Summary cards */}
-      <div className="course-grid" style={{ marginTop: '2rem', marginBottom: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-        <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1.25rem', borderRadius: '0.75rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)' }}>
-          <h3 style={{ fontSize: '1rem', opacity: 0.9 }}>Total Registered Users</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 800, marginTop: '0.25rem' }}>{totalUsers}</p>
-        </div>
-        <div style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '1.25rem', borderRadius: '0.75rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)' }}>
-          <h3 style={{ fontSize: '1rem', opacity: 0.9 }}>Total Enrolled Students</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 800, marginTop: '0.25rem' }}>{totalEnrolled}</p>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
         <input
           type="text"
-          placeholder="Search by name or email..."
+          placeholder="Search deleted users by name or email..."
           value={searchTerm}
           onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
           className="form-input"
           style={{ maxWidth: '400px', padding: '0.6rem 1rem' }}
         />
         <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem' }}>
-          Showing {indexOfFirstUser + 1} - {Math.min(indexOfLastUser, filteredUsers.length)} of {filteredUsers.length} users
+          {filteredUsers.length > 0 && `Showing ${indexOfFirstUser + 1} - ${Math.min(indexOfLastUser, filteredUsers.length)} of ${filteredUsers.length} deleted users`}
         </div>
       </div>
 
       {loading ? (
-        <p>Loading Users...</p>
+        <p>Loading Deleted Users...</p>
       ) : filteredUsers.length > 0 ? (
         <div style={{ overflowX: 'auto', background: 'white', borderRadius: '0.75rem', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)', border: '1px solid var(--border-gray)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ background: 'var(--secondary)', color: 'white' }}>
+            <thead style={{ background: '#dc2626', color: 'white' }}>
               <tr>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Full Name</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Signup Date</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Course Duration</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Last Watched Class</th>
-                <th style={{ padding: '1rem', textAlign: 'center' }}>Completed</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
@@ -140,16 +114,8 @@ const ViewUsers = () => {
                     })}
                   </td>
                   <td style={{ padding: '1rem' }}>
-                    <select
-                      value={user.enrolledMonth || '1 month'}
-                      onChange={(e) => handleDurationChange(user._id, e.target.value)}
-                      style={{ padding: '0.35rem 0.5rem', borderRadius: '0.375rem', border: '1px solid var(--border-gray)', outline: 'none', background: 'white' }}
-                    >
-                      <option value="1 month">1 Month</option>
-                      <option value="2 months">2 Months</option>
-                    </select>
+                    {user.enrolledMonth || '1 month'}
                   </td>
-
                   <td
                     style={{
                       padding: '1rem',
@@ -164,32 +130,20 @@ const ViewUsers = () => {
                           ? (user.currentClass === "Completed" ? "🎉 Completed" : `Class ${user.currentClass}`) 
                           : "None")}
                   </td>
-
-                  <td
-                    style={{
-                      padding: '1rem',
-                      textAlign: 'center',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    {user.completedClasses} / {user.totalCourses}
-                  </td>
-
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                     <button
-                      onClick={() => handleDelete(user._id)}
+                      onClick={() => handlePermanentDelete(user._id, user.name)}
                       className="btn"
                       style={{
-                        background: 'var(--error)',
+                        background: '#dc2626',
                         color: 'white',
                         padding: '0.4rem 0.8rem',
                         fontSize: '0.85rem',
-                        width: 'auto',
                         borderRadius: '0.375rem',
-                        cursor: 'pointer'
+                        fontWeight: 600
                       }}
                     >
-                      Delete
+                      Delete Permanently
                     </button>
                   </td>
                 </tr>
@@ -199,23 +153,21 @@ const ViewUsers = () => {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', padding: '1rem', borderTop: '1px solid var(--border-gray)' }}>
-              <button
-                onClick={handlePrevPage}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem', gap: '1rem', borderTop: '1px solid var(--border-gray)' }}>
+              <button 
+                onClick={handlePrevPage} 
                 disabled={currentPage === 1}
                 className="btn"
-                style={{ width: 'auto', padding: '0.4rem 0.8rem', background: currentPage === 1 ? '#e5e7eb' : '#f3f4f6', color: '#374151', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                style={{ padding: '0.4rem 0.8rem', opacity: currentPage === 1 ? 0.5 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
               >
                 Previous
               </button>
-              <span style={{ fontSize: '0.9rem' }}>
-                Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
-              </span>
-              <button
-                onClick={handleNextPage}
+              <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Page {currentPage} of {totalPages}</span>
+              <button 
+                onClick={handleNextPage} 
                 disabled={currentPage === totalPages}
                 className="btn"
-                style={{ width: 'auto', padding: '0.4rem 0.8rem', background: currentPage === totalPages ? '#e5e7eb' : '#f3f4f6', color: '#374151', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                style={{ padding: '0.4rem 0.8rem', opacity: currentPage === totalPages ? 0.5 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
               >
                 Next
               </button>
@@ -223,10 +175,12 @@ const ViewUsers = () => {
           )}
         </div>
       ) : (
-        <p style={{ marginTop: '2rem', color: 'var(--text-gray)' }}>No registered users found.</p>
+        <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '0.75rem', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+          <p style={{ color: '#64748b', fontWeight: 600 }}>No soft-deleted users found.</p>
+        </div>
       )}
     </div>
   );
 };
 
-export default ViewUsers;
+export default DeletedUsers;

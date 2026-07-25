@@ -25,8 +25,10 @@ export const approveUser = (id) => API.put(`/auth/approve/${id}`);
 export const createCourse = (formData) => API.post('/courses/create-course', formData);
 export const addUser = (formData) => API.post('/auth/add-user', formData);
 export const getAllUsers = () => API.get('/auth/users');
+export const getDeletedUsers = () => API.get('/auth/deleted-users');
 export const updateUserDuration = (id, enrolledMonth) => API.put(`/auth/update-duration/${id}`, { enrolledMonth });
 export const deleteUser = (id) => API.delete(`/auth/delete-user/${id}`);
+export const permanentDeleteUser = (id) => API.delete(`/auth/permanent-delete-user/${id}`);
 
 // ✅ Pause / Resume All Classes
 export const pauseResumeCourses = (isPaused) =>
@@ -38,6 +40,6 @@ export const getCoursePauseStatus = () =>
 
 // Course APIs
 export const getCourses = () => API.get('/courses/courses');
-export const trackProgress = (courseId) => API.post(`/courses/progress/${courseId}`);
+export const trackProgress = (courseId, classNumber) => API.post(`/courses/progress/${courseId}`, { classNumber });
 
 export default API;

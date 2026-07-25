@@ -14,6 +14,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 body {
@@ -231,7 +232,25 @@ body {
   padding-top: 1rem;
   border-top: 1px solid var(--border-gray);
   font-size: 0.875rem;
+  display: flex;
+
+  justify-content: center;
+  flex-direction: column;
 }
+
+.course-meta p {
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+}
+
+.course-meta p svg {
+  fill: orange;
+
+}
+
 
 /* Utils */
 .text-center {
@@ -274,22 +293,71 @@ body {
 }
 
 @media(max-width:450px) {
-  .navbar{
-  
-   gap: 10px;
+  .navbar {
+
+    gap: 10px;
   }
 
- 
-  .nav-logo{
+
+  .nav-logo {
     font-size: 15px;
   }
+
   .nav-links {
-    
+
     gap: 5px;
   }
 
   .nav-link {
     font-size: 10px;
-  
+
   }
+}
+
+/* Dashboard Banner Animations */
+@keyframes floatAnimation {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes bannerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.banner-illustration-img {
+  animation: bannerFadeIn 0.8s ease-out forwards, floatAnimation 4s ease-in-out infinite 0.8s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  mix-blend-mode: screen;
+}
+
+.banner-illustration-img:hover {
+  transform: scale(1.06) translateY(-6px) !important;
+  filter: drop-shadow(0 15px 25px rgba(59, 130, 246, 0.4)) !important;
+}
+
+.full-width-banner-wrapper {
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(to right, rgba(19, 20, 20, 0.92) 0%, rgba(15, 23, 42, 0.75) 50%, rgba(114, 117, 124, 0.88) 100%), url('https://thumbs.dreamstime.com/b/flat-line-design-website-banner-learning-process-brain-creativity-innovation-learn-to-think-modern-vector-illustration-68372891.jpg');
+  background-size: cover;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  margin-bottom: 2.5rem;
 }

@@ -18,6 +18,7 @@ import ApproveUsers from './pages/admin/ApproveUsers';
 import CreateCourse from './pages/admin/CreateCourse';
 import AddUser from './pages/admin/AddUser';
 import ViewUsers from './pages/admin/ViewUsers';
+import DeletedUsers from './pages/admin/DeletedUsers';
 
 function App() {
   const dispatch = useDispatch();
@@ -76,6 +77,9 @@ function App() {
             } />
             <Route path="/admin/view-users" element={
               isAuthenticated && role === 'admin' ? <ViewUsers /> : <Navigate to="/login" />
+            } />
+            <Route path="/admin/deleted-users" element={
+              isAuthenticated && role === 'admin' ? <DeletedUsers /> : <Navigate to="/login" />
             } />
 
             <Route path="*" element={<Navigate to="/" />} />

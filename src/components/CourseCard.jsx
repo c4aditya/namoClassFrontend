@@ -2,8 +2,12 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import {Plyr} from "plyr-react";
 import "plyr-react/plyr.css";
 import { trackProgress } from "../services/api";
+import { FaRegStar } from "react-icons/fa6";
 
-const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
+const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, classNumber, index }) => {
+  const displayClassNum = classNumber !== undefined && classNumber !== null 
+    ? classNumber 
+    : (typeof index === "number" ? index + 1 : null);
   const [isLocked, setIsLocked] = useState(initialIsLocked);
   const [timeLeft, setTimeLeft] = useState(() => unlockTime - Date.now());
   const plyrRef = useRef(null);
@@ -32,38 +36,14 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
   };
 
   const videoId = course?.videoUrl ? getVideoId(course.videoUrl) : "";
+  
 
-  // useEffect(() => {
-  //   if (isLocked || !videoId) return;
-
-  //   const plyrInstance = plyrRef.current?.plyr;
-  //   if (!plyrInstance) return;
-
-
-
-  //   // Use Plyr's event API if available
-  //   if (typeof plyrInstance.on === "function") {
-  //     plyrInstance.on('play', handlePlay);
-  //     return () => {
-  //       plyrInstance.off('play', handlePlay);
-  //     };
-  //   }
-
-  //   // Fallback to native video element event listeners
-  //   const videoEl = plyrInstance?.media?.target || plyrInstance?.element;
-  //   if (videoEl && typeof videoEl.addEventListener === "function") {
-  //     videoEl.addEventListener('play', handlePlay);
-  //     return () => {
-  //       videoEl.removeEventListener('play', handlePlay);
-  //     };
-  //   }
-  // }, [videoId, course._id, isLocked]);
 
   const handlePlay = async () => {
-    console.log("Video Started");
+    console.log("Video Started", displayClassNum);
 
     try {
-      const res = await trackProgress(course._id);
+      const res = await trackProgress(course._id, displayClassNum);
       console.log(res.data);
     } catch (err) {
       console.log(err);
@@ -98,7 +78,6 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
     const hours = Math.floor(totalSecs / 3600);
     const minutes = Math.floor((totalSecs % 3600) / 60);
     const seconds = totalSecs % 60;
-
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
@@ -124,7 +103,12 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
 
         <div className="course-info">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
-            <h3 className="course-title" style={{ color: '#64748b' }}>{course?.title}</h3>
+            {displayClassNum && (
+              <span style={{ background: "#64748b", color: "#ffffff", fontSize: "0.75rem", padding: "4px 8px", borderRadius: "6px", fontWeight: 700, whiteSpace: "nowrap" }}>
+                Class {displayClassNum}
+              </span>
+            )}
+            <h3 className="course-title" style={{ color: '#64748b', flex: 1 }}>{course?.title}</h3>
             <span style={{ background: "#f1f5f9", color: "#64748b", fontSize: "0.75rem", padding: "4px 8px", borderRadius: "6px", fontWeight: 600 }}>
               Month {course?.duration || course?.month}
             </span>
@@ -209,7 +193,22 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
             gap: "10px",
           }}
         >
-          <h3 className="course-title">{course?.title}</h3>
+          {displayClassNum && (
+            <span
+              style={{
+                background: "#2563eb",
+                color: "#ffffff",
+                fontSize: "0.75rem",
+                padding: "4px 8px",
+                borderRadius: "6px",
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Class {displayClassNum}
+            </span>
+          )}
+          <h3 className="course-title" style={{ flex: 1 }}>{course?.title}</h3>
 
           <span
             style={{
@@ -239,7 +238,10 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime }) => {
 
           </p>
           <p>
-            <strong>Language:</strong> English , Hindi
+            <strong>Language :</strong> English , Hindi
+          </p>
+           <p>
+            <strong>Rating : </strong> 4<FaRegStar/>
           </p>
         </div>
       </div>

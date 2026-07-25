@@ -151,6 +151,9 @@ const handlePauseResume = async () => {
             <Link to="/admin/view-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
               View Total Users
             </Link>
+            <Link to="/admin/deleted-users" className="btn" style={{ background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontWeight: 600 }}>
+              Deleted Users
+            </Link>
 
             <button
   onClick={handlePauseResume}
