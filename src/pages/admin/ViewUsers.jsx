@@ -42,10 +42,10 @@ const ViewUsers = () => {
   };
 
   const handleDelete = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user? They will be moved to the Deleted Users tab.")) {
+    if (window.confirm("Are you sure you want to permanently delete this user? This will also remove their pre-approved email access.")) {
       try {
         const { data } = await deleteUser(userId);
-        toast.success(data.message || "User moved to Deleted Users");
+        toast.success(data.message);
         fetchUsers(); // Refresh list
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to delete user");
@@ -80,7 +80,6 @@ const ViewUsers = () => {
         <Link to="/admin/view-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/view-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/view-users' ? '#fff' : '#475569' }}>Total Users</Link>
         <Link to="/admin/approve-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/approve-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/approve-users' ? '#fff' : '#475569' }}>Approve Users</Link>
         <Link to="/admin/pending-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/pending-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/pending-users' ? '#fff' : '#475569' }}>Pending Users</Link>
-        <Link to="/admin/deleted-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/deleted-users' ? '#dc2626' : '#f1f5f9', color: location.pathname === '/admin/deleted-users' ? '#fff' : '#475569' }}>Deleted Users</Link>
       </div>
 
       <h1 className="dashboard-title">Total Users Directory</h1>
