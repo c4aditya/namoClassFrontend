@@ -109,7 +109,7 @@ const Dashboard = () => {
                     course={course}
                     isLocked={isLocked}
                     unlockTime={unlockTime}
-                    classNumber={index + 1}
+                    index={index}
                   />
                 );
               })}

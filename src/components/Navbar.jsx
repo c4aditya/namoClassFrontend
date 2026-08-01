@@ -30,7 +30,8 @@ const Navbar = () => {
             {role === 'admin' ? (
               <>
                 <Link to="/admin/dashboard" className="nav-link">Admin Panel</Link>
-                <Link to="/admin/pending-users" className="nav-link">Pending</Link>
+                <Link to="/admin/class-access-requests" className="nav-link">Class Access Requests</Link>
+                <Link to="/admin/pending-users" className="nav-link">Pending Users</Link>
               </>
             ) : (
               <Link to="/dashboard" className="nav-link">My Courses</Link>

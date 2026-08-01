@@ -20,50 +20,48 @@ const AdminDashboard = () => {
   const [pendingLoginUsers, setPendingLoginUsers] = useState([]);
 
   useEffect(() => {
-  const fetchStats = async () => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await getAdminStats();
+        setStats(data.stats);
+
+        const status = await getCoursePauseStatus();
+        setIsPaused(status.data.isCoursePaused);
+
+        const pendingLoginData = await getApprovedPendingLoginUsers();
+        setPendingLoginUsers(pendingLoginData.data.users);
+
+      } catch (error) {
+        console.error("Failed to fetch stats", error);
+      }
+    };
+
+    fetchStats();
+  }, []); 
+
+  const handlePauseResume = async () => {
     try {
-      const { data } = await getAdminStats();
-      setStats(data.stats);
+      setLoading(true);
 
-      // Get current pause status
-      const status = await getCoursePauseStatus();
-      setIsPaused(status.data.isCoursePaused);
+      const newStatus = !isPaused;
 
-      // Get approved pending login users
-      const pendingLoginData = await getApprovedPendingLoginUsers();
-      setPendingLoginUsers(pendingLoginData.data.users);
+      await pauseResumeCourses(newStatus);
+
+      setIsPaused(newStatus);
+
+      alert(
+        newStatus
+          ? "All classes paused successfully."
+          : "All classes resumed successfully."
+      );
 
     } catch (error) {
-      console.error("Failed to fetch stats", error);
+      console.error(error);
+      alert("Something went wrong.");
+    } finally {
+      setLoading(false);
     }
   };
-
-  fetchStats();
-}, []); 
-
-const handlePauseResume = async () => {
-  try {
-    setLoading(true);
-
-    const newStatus = !isPaused;
-
-    await pauseResumeCourses(newStatus);
-
-    setIsPaused(newStatus);
-
-    alert(
-      newStatus
-        ? "All classes paused successfully."
-        : "All classes resumed successfully."
-    );
-
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong.");
-  } finally {
-    setLoading(false);
-  }
-};
 
   const cards = [
     { title: 'Total Users', value: stats.totalUsers, color: '#3b82f6' },
@@ -136,6 +134,9 @@ const handlePauseResume = async () => {
             gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
             gap: '1rem' 
           }}>
+            <Link to="/admin/class-access-requests" className="btn" style={{ background: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontWeight: 600 }}>
+              Class Access Requests
+            </Link>
             <Link to="/admin/pending-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
               View Pending
             </Link>
@@ -153,25 +154,25 @@ const handlePauseResume = async () => {
             </Link>
 
             <button
-  onClick={handlePauseResume}
-  disabled={loading}
-  className="btn"
-  style={{
-    background: isPaused ? "#16a34a" : "#dc2626",
-    color: "#fff",
-    border: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer"
-  }}
->
-  {loading
-    ? "Please Wait..."
-    : isPaused
-    ? "Resume All Classes"
-    : "Pause All Classes"}
-</button>
+              onClick={handlePauseResume}
+              disabled={loading}
+              className="btn"
+              style={{
+                background: isPaused ? "#16a34a" : "#dc2626",
+                color: "#fff",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer"
+              }}
+            >
+              {loading
+                ? "Please Wait..."
+                : isPaused
+                ? "Resume All Classes"
+                : "Pause All Classes"}
+            </button>
 
            
           </div>

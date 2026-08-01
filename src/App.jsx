@@ -18,6 +18,7 @@ import ApproveUsers from './pages/admin/ApproveUsers';
 import CreateCourse from './pages/admin/CreateCourse';
 import AddUser from './pages/admin/AddUser';
 import ViewUsers from './pages/admin/ViewUsers';
+import ClassAccessRequests from './pages/admin/ClassAccessRequests';
 
 function App() {
   const dispatch = useDispatch();
@@ -61,6 +62,9 @@ function App() {
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={
               isAuthenticated && role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" />
+            } />
+            <Route path="/admin/class-access-requests" element={
+              isAuthenticated && role === 'admin' ? <ClassAccessRequests /> : <Navigate to="/login" />
             } />
             <Route path="/admin/pending-users" element={
               isAuthenticated && role === 'admin' ? <PendingUsers /> : <Navigate to="/login" />

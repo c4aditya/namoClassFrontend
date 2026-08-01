@@ -35,6 +35,13 @@ export const pauseResumeCourses = (isPaused) =>
 export const getCoursePauseStatus = () =>
     API.get('/courses/pause-courses');
 
+// ✅ Per Class Access Requests (Student & Admin)
+export const requestClassAccess = (data) => API.post('/request-class-access', data);
+export const getClassAccessStatus = (classId) => API.get(`/class-access-status/${classId}`);
+export const getAllClassAccessStatuses = () => API.get('/class-access-statuses');
+export const getAdminClassAccessRequests = (status, search) => API.get('/admin/class-access-requests', { params: { ...(status ? { status } : {}), ...(search ? { search } : {}) } });
+export const approveClassAccessRequest = (id) => API.patch(`/admin/class-access-request/${id}/approve`);
+export const rejectClassAccessRequest = (id) => API.patch(`/admin/class-access-request/${id}/reject`);
 
 // Course APIs
 export const getCourses = () => API.get('/courses/courses');
