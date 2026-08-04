@@ -49,6 +49,35 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
   const [requestLoading, setRequestLoading] = useState(false);
   const plyrRef = useRef(null);
 
+  const nextGrantAccessTime = course?.nextGrantAccessTime;
+  const [delayTimeLeft, setDelayTimeLeft] = useState(() => {
+    if (!nextGrantAccessTime) return 0;
+    return Math.max(0, new Date(nextGrantAccessTime).getTime() - Date.now());
+  });
+
+  useEffect(() => {
+    if (!nextGrantAccessTime) return;
+
+    const updateDelayTimer = () => {
+      const remaining = Math.max(0, new Date(nextGrantAccessTime).getTime() - Date.now());
+      setDelayTimeLeft(remaining);
+    };
+
+    updateDelayTimer();
+    const interval = setInterval(updateDelayTimer, 1000);
+    return () => clearInterval(interval);
+  }, [nextGrantAccessTime]);
+
+  const formatDelayTime = (ms) => {
+    if (ms <= 0) return "";
+    const totalSecs = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSecs / 3600);
+    const minutes = Math.floor((totalSecs % 3600) / 60);
+    const seconds = totalSecs % 60;
+    const pad = (num) => String(num).padStart(2, '0');
+    return `${hours}h ${pad(minutes)}m ${pad(seconds)}s`;
+  };
+
   useEffect(() => {
     if (course?.accessStatus) {
       setAccessStatus(course.accessStatus);
@@ -292,6 +321,42 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
     }
 
     // Not Requested State (Immediate Next Class)
+    if (delayTimeLeft > 0) {
+      return (
+        <div className="video-container" style={{
+          height: '225px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#1e293b',
+          color: '#ffffff',
+          borderRadius: '8px',
+          padding: '1.25rem',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '2.25rem', marginBottom: '0.35rem' }}>🔒</div>
+          <h4 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '0.35rem', color: '#e2e8f0' }}>
+            Approval Required to Watch
+          </h4>
+          <p style={{ fontSize: '0.8rem', color: '#f59e0b', marginBottom: '0.65rem', lineHeight: 1.4, padding: '0 0.5rem' }}>
+            ⏳ Grant Access will be available 12 hours after your last approved class.
+          </p>
+          <div style={{
+            background: 'rgba(245, 158, 11, 0.15)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            color: '#fef3c7',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            padding: '5px 14px',
+            borderRadius: '20px'
+          }}>
+            Available in: {formatDelayTime(delayTimeLeft)}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="video-container" style={{
         height: '225px',
@@ -414,6 +479,12 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
               >
                 Grant Access
               </button>
+            </div>
+          ) : delayTimeLeft > 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ color: "#d97706", fontSize: "0.85rem", fontWeight: 600, margin: 0 }}>
+                ⏳ Available in: {formatDelayTime(delayTimeLeft)}
+              </p>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
