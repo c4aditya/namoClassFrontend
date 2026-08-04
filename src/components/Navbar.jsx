@@ -36,8 +36,9 @@ const Navbar = () => {
             ) : (
               <Link to="/dashboard" className="nav-link">My Courses</Link>
             )}
-            <span style={{ color: '#64748b' }}>|</span>
-            <span style={{ fontWeight: 600, color: '#93c5fd' }}>{user?.name || user?.email?.split('@')[0]}</span>
+            <span style={{ fontWeight: 600, color: '#93c5fd' }}>
+              {user?.name ? user.name.trim().split(' ')[0] : (user?.email?.split('@')[0] || '')}
+            </span>
             <button 
               onClick={handleLogout}
               className="btn btn-logout"

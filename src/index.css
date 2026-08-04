@@ -362,3 +362,51 @@ body {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
   margin-bottom: 2.5rem;
 }
+
+/* Mobile & Tablet Responsive Adjustments */
+@media (max-width: 768px) {
+  .container {
+    width: 95% !important;
+    padding: 0 0.5rem !important;
+  }
+  
+  .dashboard-title {
+    font-size: 1.6rem !important;
+  }
+
+  .course-card {
+    padding: 1rem !important;
+  }
+
+  .course-title {
+    font-size: 1.1rem !important;
+  }
+
+  .course-desc {
+    font-size: 0.85rem !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .full-width-banner-wrapper {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .navbar {
+    padding: 0.75rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-title {
+    font-size: 1.35rem !important;
+  }
+
+  .course-card {
+    padding: 0.85rem !important;
+  }
+
+  .btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.825rem !important;
+  }
+}

@@ -92,14 +92,55 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
     }
   }, [course._id, isIntro, course?.accessStatus]);
 
-  const getVideoId = (url) => {
-    if (!url) return "";
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : "";
+  const parseVideoSource = (rawUrl) => {
+    if (!rawUrl || typeof rawUrl !== 'string') {
+      return { type: 'invalid', message: 'No video URL provided' };
+    }
+
+    let cleaned = rawUrl.trim();
+
+    // 1. If HTML iframe string passed, extract src attribute
+    if (cleaned.includes('<iframe')) {
+      const srcMatch = cleaned.match(/src=["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) {
+        cleaned = srcMatch[1].trim();
+      }
+    }
+
+    // 2. Check if standalone 11-char YouTube ID (e.g., "dQw4w9WgXcQ")
+    if (/^[a-zA-Z0-9_-]{11}$/.test(cleaned)) {
+      return {
+        type: 'youtube',
+        videoId: cleaned,
+        embedUrl: `https://www.youtube.com/embed/${cleaned}`
+      };
+    }
+
+    // 3. Check YouTube URL patterns (watch?v=, youtu.be/, embed/, shorts/, live/)
+    const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
+    const ytMatch = cleaned.match(ytRegex);
+    if (ytMatch && ytMatch[1] && ytMatch[1].length === 11) {
+      return {
+        type: 'youtube',
+        videoId: ytMatch[1],
+        embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}`
+      };
+    }
+
+    // 4. Check for direct HTTP/HTTPS video URL
+    if (/^https?:\/\//i.test(cleaned)) {
+      return {
+        type: 'html5',
+        url: cleaned
+      };
+    }
+
+    return { type: 'invalid', message: 'Invalid video URL format' };
   };
 
-  const videoId = course?.videoUrl ? getVideoId(course.videoUrl) : "";
+  const videoSourceInfo = useMemo(() => {
+    return parseVideoSource(course?.videoUrl);
+  }, [course?.videoUrl]);
 
   const handlePlay = async () => {
     try {
@@ -159,15 +200,31 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
     }
   };
 
-  const plyrSource = useMemo(() => ({
-    type: "video",
-    sources: [
-      {
-        src: videoId,
-        provider: "youtube",
-      },
-    ],
-  }), [videoId]);
+  const plyrSource = useMemo(() => {
+    if (videoSourceInfo.type === 'youtube' && videoSourceInfo.videoId) {
+      return {
+        type: "video",
+        sources: [
+          {
+            src: videoSourceInfo.videoId,
+            provider: "youtube",
+          },
+        ],
+      };
+    }
+    if (videoSourceInfo.type === 'html5' && videoSourceInfo.url) {
+      return {
+        type: "video",
+        sources: [
+          {
+            src: videoSourceInfo.url,
+            type: videoSourceInfo.url.endsWith('.webm') ? 'video/webm' : 'video/mp4'
+          },
+        ],
+      };
+    }
+    return null;
+  }, [videoSourceInfo]);
 
   const plyrOptions = useMemo(() => ({
     controls: [
@@ -185,7 +242,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
     ],
     settings: ['captions', 'quality', 'speed'],
     youtube: {
-      noCookie: true,
+      noCookie: false,
       rel: 0,
       showinfo: 0,
       iv_load_policy: 3,
@@ -194,20 +251,18 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
   }), []);
 
   // Render Video or Request Container based on accessStatus
-
-  // Render Video or Request Container based on accessStatus
   const renderVideoOrAccessControl = () => {
     // Intro class or Approved class -> show Video Player
     if (isIntro || accessStatus === 'Approved') {
       return (
         <div className="video-container" style={{ position: 'relative' }}>
-          {videoId ? (
-            <VideoErrorBoundary key={course?._id || videoId}>
+          {plyrSource ? (
+            <VideoErrorBoundary key={course?._id || videoSourceInfo.videoId || videoSourceInfo.url}>
               <Plyr
                 source={plyrSource}
                 options={plyrOptions}
                 ref={plyrRef}
-                key={videoId}
+                key={videoSourceInfo.videoId || videoSourceInfo.url}
                 onPlay={handlePlay}
               />
               <div className="video-protection-overlay"></div>
@@ -216,12 +271,22 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
             <div style={{
               height: '225px',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#f1f5f9',
-              borderRadius: '8px'
+              background: '#0f172a',
+              color: '#ffffff',
+              borderRadius: '8px',
+              padding: '1rem',
+              textAlign: 'center'
             }}>
-              <p style={{ color: "red" }}>Invalid or locked video URL</p>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚠️</div>
+              <h4 style={{ fontSize: '1rem', fontWeight: 600, color: '#e2e8f0', marginBottom: '0.25rem' }}>
+                Video Unavailable
+              </h4>
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                The video link for this class is invalid or missing.
+              </p>
             </div>
           )}
         </div>

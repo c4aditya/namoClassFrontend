@@ -58,7 +58,7 @@ const Dashboard = () => {
             </span>
 
             <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#ffffff', marginBottom: '0.5rem', lineHeight: 1.2, overflow: 'hidden' }}>
-              Welcome Back, <span style={{ color: '#60a5fa' }}>{user?.name || 'Student'}</span>! 👋
+              Welcome Back, <span style={{ color: '#60a5fa' }}>{user?.name ? user.name.trim().split(' ')[0] : 'Student'}</span>! 👋
             </h1>
 
             <p style={{ color: '#cbd5e1', fontSize: '1.1rem', marginTop: '0.5rem', maxWidth: '560px', lineHeight: 1.6 }}>

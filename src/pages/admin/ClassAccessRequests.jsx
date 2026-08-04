@@ -237,7 +237,7 @@ const ClassAccessRequests = () => {
           )}
 
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {['Pending', 'Approved', 'Rejected'].map((tab) => (
+            {['Pending'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
