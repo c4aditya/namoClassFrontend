@@ -71,27 +71,88 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="container" style={{ paddingTop: '2rem' }}>
-      <h1 className="dashboard-title">Admin Dashboard</h1>
+    <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
+      <h1 className="dashboard-title" style={{ marginBottom: '1.5rem' }}>Admin Dashboard</h1>
       
-      <div className="course-grid" style={{ marginTop: '2rem', marginBottom: '3rem' }}>
+      {/* FIRST: Quick Actions */}
+      <div className="course-card" style={{ padding: '1.25rem', marginBottom: '1.75rem', width: '100%' }}>
+        <h2 className="course-title" style={{ marginBottom: '1rem', fontSize: '1.15rem' }}>Quick Actions</h2>
+        <div style={{ 
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+          alignItems: 'center'
+        }}>
+          <Link to="/admin/class-access-requests" className="btn" style={{ background: '#2563eb', color: '#ffffff', textDecoration: 'none', fontWeight: 600, padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
+            Class Access Requests
+          </Link>
+          <Link to="/admin/approve-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', textDecoration: 'none', padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
+            Approve Users
+          </Link>
+          <Link to="/admin/create-course" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', textDecoration: 'none', padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
+            Create Course
+          </Link>
+          <Link to="/admin/add-user" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', textDecoration: 'none', padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
+            Add User
+          </Link>
+          <Link to="/admin/view-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', textDecoration: 'none', padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
+            View Total Users
+          </Link>
+
+          <button
+            onClick={handlePauseResume}
+            disabled={loading}
+            className="btn"
+            style={{
+              background: isPaused ? "#16a34a" : "#dc2626",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              padding: '0 1rem',
+              height: '38px',
+              width: 'auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              borderRadius: '0.5rem'
+            }}
+          >
+            {loading
+              ? "Please Wait..."
+              : isPaused
+              ? "Resume All Classes"
+              : "Pause All Classes"}
+          </button>
+        </div>
+      </div>
+
+      {/* SECOND: Dashboard Statistics (4 Compact Boxes in Single Row) */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: '1rem', 
+        marginBottom: '2rem' 
+      }}>
         {cards.map((card, index) => (
           <div key={index} style={{ 
             backgroundColor: card.color, 
             color: 'white', 
-            padding: '1.5rem', 
-            borderRadius: '1rem',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+            padding: '1rem 1.25rem', 
+            borderRadius: '0.75rem',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
           }}>
-            <h3 style={{ fontSize: '1.125rem', opacity: 0.9 }}>{card.title}</h3>
-            <p style={{ fontSize: '2.5rem', fontWeight: 800, marginTop: '0.5rem' }}>{card.value}</p>
+            <h3 style={{ fontSize: '0.95rem', opacity: 0.9, margin: 0, fontWeight: 600 }}>{card.title}</h3>
+            <p style={{ fontSize: '1.85rem', fontWeight: 800, marginTop: '0.35rem', marginBottom: 0 }}>{card.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Approved Users (Pending First Login) */}
+      {/* THIRD: Approved Users (Pending First Login) */}
       <div className="course-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-        <h2 className="course-title" style={{ marginBottom: '1.5rem' }}>Approved Users (Pending First Login)</h2>
+        <h2 className="course-title" style={{ marginBottom: '1.25rem', fontSize: '1.25rem' }}>Approved Users (Pending First Login)</h2>
         {pendingLoginUsers.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--border-gray)' }}>
@@ -122,62 +183,10 @@ const AdminDashboard = () => {
             </table>
           </div>
         ) : (
-          <p style={{ color: 'var(--text-gray)' }}>No approved users pending login.</p>
+          <p style={{ color: 'var(--text-gray)', margin: 0 }}>No approved users pending login.</p>
         )}
       </div>
 
-      <div style={{ maxWidth: '600px' }}>
-        <div className="course-card" style={{ padding: '1.5rem' }}>
-          <h2 className="course-title" style={{ marginBottom: '1.5rem' }}>Quick Actions</h2>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
-            gap: '1rem' 
-          }}>
-            <Link to="/admin/class-access-requests" className="btn" style={{ background: '#2563eb', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', fontWeight: 600 }}>
-              Class Access Requests
-            </Link>
-            <Link to="/admin/pending-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-              View Pending
-            </Link>
-            <Link to="/admin/approve-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-              Approve Users
-            </Link>
-            <Link to="/admin/create-course" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-              Create Course
-            </Link>
-            <Link to="/admin/add-user" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-              Add User
-            </Link>
-            <Link to="/admin/view-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-              View Total Users
-            </Link>
-
-            <button
-              onClick={handlePauseResume}
-              disabled={loading}
-              className="btn"
-              style={{
-                background: isPaused ? "#16a34a" : "#dc2626",
-                color: "#fff",
-                border: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer"
-              }}
-            >
-              {loading
-                ? "Please Wait..."
-                : isPaused
-                ? "Resume All Classes"
-                : "Pause All Classes"}
-            </button>
-
-           
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

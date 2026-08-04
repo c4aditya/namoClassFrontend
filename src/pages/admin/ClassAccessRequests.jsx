@@ -344,6 +344,7 @@ const ClassAccessRequests = () => {
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Student Email</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Course</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Last Watched Class</th>
+                  <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Last Approved Class</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Requested Class</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Status</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Requested On</th>
@@ -383,6 +384,9 @@ const ClassAccessRequests = () => {
                       }}>
                         {getLastWatchedClassDisplay(req.userId)}
                       </span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', fontWeight: 600, color: '#475569' }}>
+                      {req.lastApprovedClass || 'N/A'}
                     </td>
                     <td style={{ padding: '0.85rem 1rem', fontWeight: 700, color: '#2563eb' }}>
                       {req.classNumber}

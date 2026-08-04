@@ -96,49 +96,166 @@ const Dashboard = () => {
             Your Courses
           </h2>
 
-          {courses.length > 0 ? (
-            <div className="course-grid">
-              {(() => {
-                const userLastWatched = user?.lastWatchedClass || 0;
-                const nextClassIndex = courses.findIndex(
-                  (c, idx) => !(idx === 0 || idx <= userLastWatched || c.accessStatus === 'Approved')
-                );
+          {(() => {
+            const isClassesPaused = Array.isArray(courses) && courses.length > 0 && courses.some(c => c.isPaused === true);
 
-                return courses.map((course, index) => {
-                  const accessTime = new Date(user?.approvedAt || user?.createdAt).getTime();
-                  const unlockTime = accessTime + index * 12 * 60 * 60 * 1000;
-                  const isLocked = Date.now() < unlockTime;
-                  const isNextClass = course.isNextClass !== undefined ? course.isNextClass : (index === nextClassIndex);
-                  const isFutureLocked = course.isFutureLocked !== undefined ? course.isFutureLocked : (nextClassIndex !== -1 && index > nextClassIndex);
+            if (isClassesPaused) {
+              return (
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '2rem 1rem',
+                    width: '100%'
+                  }}
+                >
+                  <div
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      padding: '2.5rem 2rem',
+                      maxWidth: '540px',
+                      width: '100%',
+                      textAlign: 'center',
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                      border: '1px solid #e2e8f0'
+                    }}
+                  >
+                    {/* Pause / Holiday Icon */}
+                    <div
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        background: '#fef3c7',
+                        color: '#d97706',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2.5rem',
+                        margin: '0 auto 1.5rem auto',
+                        boxShadow: '0 4px 12px rgba(217, 119, 6, 0.15)'
+                      }}
+                    >
+                      📢
+                    </div>
 
-                  return (
-                    <CourseCard
-                      key={course._id}
-                      course={course}
-                      isLocked={isLocked}
-                      unlockTime={unlockTime}
-                      index={index}
-                      isNextClass={isNextClass}
-                      isFutureLocked={isFutureLocked}
-                    />
+                    <h3
+                      style={{
+                        fontSize: '1.75rem',
+                        fontWeight: 800,
+                        color: '#0f172a',
+                        marginBottom: '1rem',
+                        letterSpacing: '-0.02em'
+                      }}
+                    >
+                      Classes Paused
+                    </h3>
+
+                    <div
+                      style={{
+                        background: '#f8fafc',
+                        borderRadius: '12px',
+                        padding: '1.25rem 1.5rem',
+                        marginBottom: '1.5rem',
+                        border: '1px solid #f1f5f9',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontSize: '1rem',
+                          lineHeight: 1.6,
+                          color: '#334155',
+                          marginBottom: '0.75rem',
+                          fontWeight: 500
+                        }}
+                      >
+                        Due to a holiday, today's classes have been paused.
+                      </p>
+                      <p
+                        style={{
+                          fontSize: '0.95rem',
+                          lineHeight: 1.6,
+                          color: '#475569',
+                          marginBottom: '0.75rem'
+                        }}
+                      >
+                        Classes are also paused on Saturday and Sunday.
+                      </p>
+                      <p
+                        style={{
+                          fontSize: '0.95rem',
+                          lineHeight: 1.6,
+                          color: '#2563eb',
+                          fontWeight: 600,
+                          margin: 0
+                        }}
+                      >
+                        Your classes will resume from the next working day.
+                      </p>
+                    </div>
+
+                    <p
+                      style={{
+                        fontSize: '0.9rem',
+                        color: '#64748b',
+                        margin: 0,
+                        fontWeight: 500
+                      }}
+                    >
+                      Thank you for your patience.
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            return courses.length > 0 ? (
+              <div className="course-grid">
+                {(() => {
+                  const userLastWatched = user?.lastWatchedClass || 0;
+                  const nextClassIndex = courses.findIndex(
+                    (c, idx) => !(idx === 0 || idx <= userLastWatched || c.accessStatus === 'Approved')
                   );
-                });
-              })()}
-            </div>
-          ) : (
-            <div style={{
-              background: '#eff6ff',
-              padding: '2.5rem',
-              borderRadius: '1rem',
-              textAlign: 'center',
-              border: '1px solid #dbeafe'
-            }}>
-              <p style={{ fontSize: '1.25rem', color: '#1e40af', fontWeight: 600, marginBottom: '0.5rem' }}>
-                No courses found yet.
-              </p>
-              <p style={{ color: '#2563eb' }}>Please wait for admin to update your enrollment or check back later.</p>
-            </div>
-          )}
+
+                  return courses.map((course, index) => {
+                    const accessTime = new Date(user?.approvedAt || user?.createdAt).getTime();
+                    const unlockTime = accessTime + index * 12 * 60 * 60 * 1000;
+                    const isLocked = Date.now() < unlockTime;
+                    const isNextClass = course.isNextClass !== undefined ? course.isNextClass : (index === nextClassIndex);
+                    const isFutureLocked = course.isFutureLocked !== undefined ? course.isFutureLocked : (nextClassIndex !== -1 && index > nextClassIndex);
+
+                    return (
+                      <CourseCard
+                        key={course._id}
+                        course={course}
+                        isLocked={isLocked}
+                        unlockTime={unlockTime}
+                        index={index}
+                        isNextClass={isNextClass}
+                        isFutureLocked={isFutureLocked}
+                      />
+                    );
+                  });
+                })()}
+              </div>
+            ) : (
+              <div style={{
+                background: '#eff6ff',
+                padding: '2.5rem',
+                borderRadius: '1rem',
+                textAlign: 'center',
+                border: '1px solid #dbeafe'
+              }}>
+                <p style={{ fontSize: '1.25rem', color: '#1e40af', fontWeight: 600, marginBottom: '0.5rem' }}>
+                  No courses found yet.
+                </p>
+                <p style={{ color: '#2563eb' }}>Please wait for admin to update your enrollment or check back later.</p>
+              </div>
+            );
+          })()}
         </section>
       </div>
     </>
