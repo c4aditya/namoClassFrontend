@@ -5,9 +5,43 @@ import { trackProgress, requestClassAccess, getClassAccessStatus } from "../serv
 import { FaRegStar } from "react-icons/fa6";
 import toast from "react-hot-toast";
 
-const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) => {
+class VideoErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error) {
+    console.warn("Video Player caught non-fatal DOM error:", error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          height: '225px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#0f172a',
+          color: '#ffffff',
+          borderRadius: '8px'
+        }}>
+          <p style={{ fontSize: '0.9rem', color: '#94a3b8' }}>Loading video player...</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNextClass: propIsNextClass, isFutureLocked: propIsFutureLocked }) => {
   const isIntro = index === 0 || course?.isIntro === true;
   const displayClassLabel = isIntro ? "Intro Class" : `Class ${index}`;
+
+  const isFutureLocked = propIsFutureLocked !== undefined ? propIsFutureLocked : course?.isFutureLocked;
+  const isNextClass = propIsNextClass !== undefined ? propIsNextClass : course?.isNextClass;
 
   const [isLocked, setIsLocked] = useState(initialIsLocked);
   const [timeLeft, setTimeLeft] = useState(() => unlockTime - Date.now());
@@ -34,7 +68,9 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
   }, [unlockTime]);
 
   useEffect(() => {
-    if (!isIntro && !course?.accessStatus) {
+    if (course?.accessStatus) {
+      setAccessStatus(course.accessStatus);
+    } else if (!isIntro) {
       getClassAccessStatus(course._id)
         .then((res) => {
           if (res.data?.success && res.data?.status) {
@@ -66,17 +102,24 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
   useEffect(() => {
     if (accessStatus !== 'Approved') return;
 
+    let playerInstance = null;
     const timer = setTimeout(() => {
-      const player = plyrRef.current?.plyr;
-      if (!player) return;
-
-      player.on("play", handlePlay);
-      return () => {
-        player.off("play", handlePlay);
-      };
+      playerInstance = plyrRef.current?.plyr;
+      if (playerInstance) {
+        try {
+          playerInstance.on("play", handlePlay);
+        } catch (e) {}
+      }
     }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (playerInstance) {
+        try {
+          playerInstance.off("play", handlePlay);
+        } catch (e) {}
+      }
+    };
   }, [accessStatus]);
 
   const handleRequestAccessSubmit = async () => {
@@ -192,7 +235,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
       return (
         <div className="video-container" style={{ position: 'relative' }}>
           {videoId ? (
-            <>
+            <VideoErrorBoundary key={course?._id || videoId}>
               <Plyr
                 source={plyrSource}
                 options={plyrOptions}
@@ -201,7 +244,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
                 onPlay={handlePlay}
               />
               <div className="video-protection-overlay"></div>
-            </>
+            </VideoErrorBoundary>
           ) : (
             <div style={{
               height: '225px',
@@ -214,6 +257,33 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
               <p style={{ color: "red" }}>Invalid or locked video URL</p>
             </div>
           )}
+        </div>
+      );
+    }
+
+    // Future Locked State (after immediate next class)
+    if (isFutureLocked) {
+      return (
+        <div className="video-container" style={{
+          height: '225px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#0f172a',
+          color: '#ffffff',
+          borderRadius: '8px',
+          padding: '1.5rem',
+          textAlign: 'center',
+          opacity: 0.85
+        }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔒</div>
+          <h4 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.25rem' }}>
+            Locked
+          </h4>
+          <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
+            Complete the previous class to request access.
+          </p>
         </div>
       );
     }
@@ -277,13 +347,13 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
               transition: 'background 0.2s'
             }}
           >
-            {requestLoading ? 'Requesting...' : 'Request Again'}
+            {requestLoading ? 'Requesting...' : 'Grant Access'}
           </button>
         </div>
       );
     }
 
-    // Not Requested State
+    // Not Requested State (Immediate Next Class)
     return (
       <div className="video-container" style={{
         height: '225px',
@@ -298,7 +368,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
         textAlign: 'center'
       }}>
         <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔒</div>
-        <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem', color: '#e2e8f0' }}>
+        <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem', color: '#e2e8f0' }}>
           Approval Required to Watch
         </h4>
         <button
@@ -316,7 +386,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
             boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.4)'
           }}
         >
-          {requestLoading ? 'Submitting...' : 'Get Class Access'}
+          {requestLoading ? 'Submitting...' : 'Grant Access'}
         </button>
       </div>
     );
@@ -377,6 +447,10 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
             <p style={{ color: "#22c55e", fontSize: "0.85rem", fontWeight: 600 }}>
               ▶ Play Class (Access Approved)
             </p>
+          ) : isFutureLocked ? (
+            <p style={{ color: "#64748b", fontSize: "0.85rem", fontWeight: 600 }}>
+              🔒 Locked
+            </p>
           ) : accessStatus === 'Pending' ? (
             <p style={{ color: "#d97706", fontSize: "0.85rem", fontWeight: 600 }}>
               ⏳ Waiting for Admin Approval
@@ -400,7 +474,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
                   cursor: requestLoading ? 'wait' : 'pointer'
                 }}
               >
-                Request Again
+                Grant Access
               </button>
             </div>
           ) : (
@@ -422,7 +496,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index }) =>
                   cursor: requestLoading ? 'wait' : 'pointer'
                 }}
               >
-                Get Class Access
+                Grant Access
               </button>
             </div>
           )}

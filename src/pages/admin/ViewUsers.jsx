@@ -122,7 +122,6 @@ const ViewUsers = () => {
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Signup Date</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Course Duration</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Last Watched Class</th>
-                <th style={{ padding: '1rem', textAlign: 'center' }}>Completed</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
@@ -162,16 +161,6 @@ const ViewUsers = () => {
                       : (user.currentClass && user.currentClass !== "None" 
                           ? (user.currentClass === "Completed" ? "🎉 Completed" : `Class ${user.currentClass}`) 
                           : "None")}
-                  </td>
-
-                  <td
-                    style={{
-                      padding: '1rem',
-                      textAlign: 'center',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    {user.completedClasses} / {user.totalCourses}
                   </td>
 
                   <td style={{ padding: '1rem', textAlign: 'center' }}>

@@ -98,21 +98,32 @@ const Dashboard = () => {
 
           {courses.length > 0 ? (
             <div className="course-grid">
-              {courses.map((course, index) => {
-                const accessTime = new Date(user?.approvedAt || user?.createdAt).getTime();
-                const unlockTime = accessTime + index * 12 * 60 * 60 * 1000;
-                const isLocked = Date.now() < unlockTime;
-
-                return (
-                  <CourseCard
-                    key={course._id}
-                    course={course}
-                    isLocked={isLocked}
-                    unlockTime={unlockTime}
-                    index={index}
-                  />
+              {(() => {
+                const userLastWatched = user?.lastWatchedClass || 0;
+                const nextClassIndex = courses.findIndex(
+                  (c, idx) => !(idx === 0 || idx <= userLastWatched || c.accessStatus === 'Approved')
                 );
-              })}
+
+                return courses.map((course, index) => {
+                  const accessTime = new Date(user?.approvedAt || user?.createdAt).getTime();
+                  const unlockTime = accessTime + index * 12 * 60 * 60 * 1000;
+                  const isLocked = Date.now() < unlockTime;
+                  const isNextClass = course.isNextClass !== undefined ? course.isNextClass : (index === nextClassIndex);
+                  const isFutureLocked = course.isFutureLocked !== undefined ? course.isFutureLocked : (nextClassIndex !== -1 && index > nextClassIndex);
+
+                  return (
+                    <CourseCard
+                      key={course._id}
+                      course={course}
+                      isLocked={isLocked}
+                      unlockTime={unlockTime}
+                      index={index}
+                      isNextClass={isNextClass}
+                      isFutureLocked={isFutureLocked}
+                    />
+                  );
+                });
+              })()}
             </div>
           ) : (
             <div style={{

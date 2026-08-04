@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import {
   getAdminClassAccessRequests,
   approveClassAccessRequest,
-  rejectClassAccessRequest
+  rejectClassAccessRequest,
+  deleteClassAccessRequest
 } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const ClassAccessRequests = () => {
   const [requests, setRequests] = useState([]);
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState('Pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
@@ -42,11 +43,7 @@ const ClassAccessRequests = () => {
       const { data } = await approveClassAccessRequest(id);
       if (data.success) {
         toast.success("Request Approved!");
-        setRequests((prev) =>
-          prev.map((req) =>
-            req._id === id ? { ...req, status: 'Approved' } : req
-          )
-        );
+        setRequests((prev) => prev.filter((req) => req._id !== id));
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to approve request");
@@ -61,17 +58,50 @@ const ClassAccessRequests = () => {
       const { data } = await rejectClassAccessRequest(id);
       if (data.success) {
         toast.success("Request Rejected!");
-        setRequests((prev) =>
-          prev.map((req) =>
-            req._id === id ? { ...req, status: 'Rejected' } : req
-          )
-        );
+        setRequests((prev) => prev.filter((req) => req._id !== id));
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to reject request");
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to permanently delete this access request?")) {
+      try {
+        setActionLoadingId(id);
+        const { data } = await deleteClassAccessRequest(id);
+        if (data.success) {
+          toast.success("Request Deleted Permanently!");
+          setRequests((prev) => prev.filter((req) => req._id !== id));
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to delete request");
+      } finally {
+        setActionLoadingId(null);
+      }
+    }
+  };
+
+  const format12HourDateTime = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'N/A';
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const formattedHours = String(hours).padStart(2, '0');
+
+    return `${day}/${month}/${year}, ${formattedHours}:${minutes}:${seconds} ${ampm}`;
   };
 
   const getLastWatchedClassDisplay = (user) => {
@@ -141,7 +171,7 @@ const ClassAccessRequests = () => {
         
         {/* Filter Buttons */}
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {['All', 'Pending', 'Approved', 'Rejected'].map((tab) => (
+          {['Pending', 'Approved', 'Rejected'].map((tab) => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
@@ -273,13 +303,7 @@ const ClassAccessRequests = () => {
                       {getStatusBadge(req.status)}
                     </td>
                     <td style={{ padding: '0.85rem 1rem', fontSize: '0.875rem', color: 'var(--text-gray)' }}>
-                      {req.requestedAt ? new Date(req.requestedAt).toLocaleString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'N/A'}
+                      {format12HourDateTime(req.requestedAt)}
                     </td>
                     <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
                       {req.status === 'Pending' ? (
@@ -318,9 +342,22 @@ const ClassAccessRequests = () => {
                           </button>
                         </div>
                       ) : (
-                        <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                          No Actions Needed
-                        </span>
+                        <button
+                          onClick={() => handleDelete(req._id)}
+                          disabled={actionLoadingId === req._id}
+                          style={{
+                            background: '#dc2626',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '6px 14px',
+                            borderRadius: '6px',
+                            fontWeight: 600,
+                            fontSize: '0.8rem',
+                            cursor: actionLoadingId === req._id ? 'wait' : 'pointer'
+                          }}
+                        >
+                          Delete
+                        </button>
                       )}
                     </td>
                   </tr>
