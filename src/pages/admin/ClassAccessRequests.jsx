@@ -3,7 +3,8 @@ import {
   getAdminClassAccessRequests,
   approveClassAccessRequest,
   rejectClassAccessRequest,
-  deleteClassAccessRequest
+  deleteClassAccessRequest,
+  bulkDeleteClassAccessRequests
 } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -13,6 +14,7 @@ const ClassAccessRequests = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const fetchRequests = async (statusFilter, query) => {
     try {
@@ -37,6 +39,10 @@ const ClassAccessRequests = () => {
     return () => clearTimeout(handler);
   }, [filter, searchTerm]);
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [filter, searchTerm]);
+
   const handleApprove = async (id) => {
     try {
       setActionLoadingId(id);
@@ -44,6 +50,7 @@ const ClassAccessRequests = () => {
       if (data.success) {
         toast.success("Request Approved!");
         setRequests((prev) => prev.filter((req) => req._id !== id));
+        setSelectedIds((prev) => prev.filter((item) => item !== id));
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to approve request");
@@ -59,6 +66,7 @@ const ClassAccessRequests = () => {
       if (data.success) {
         toast.success("Request Rejected!");
         setRequests((prev) => prev.filter((req) => req._id !== id));
+        setSelectedIds((prev) => prev.filter((item) => item !== id));
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to reject request");
@@ -75,11 +83,46 @@ const ClassAccessRequests = () => {
         if (data.success) {
           toast.success("Request Deleted Permanently!");
           setRequests((prev) => prev.filter((req) => req._id !== id));
+          setSelectedIds((prev) => prev.filter((item) => item !== id));
         }
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to delete request");
       } finally {
         setActionLoadingId(null);
+      }
+    }
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(requests.map((r) => r._id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectRow = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+
+    if (window.confirm(`Are you sure you want to permanently delete the selected request(s)?`)) {
+      try {
+        setLoading(true);
+        const { data } = await bulkDeleteClassAccessRequests(selectedIds);
+        if (data.success) {
+          toast.success(data.message || "Selected requests deleted permanently!");
+          setRequests((prev) => prev.filter((req) => !selectedIds.includes(req._id)));
+          setSelectedIds([]);
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to delete selected requests");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -164,32 +207,56 @@ const ClassAccessRequests = () => {
     );
   };
 
+  const showCheckbox = filter === 'Approved' || filter === 'Rejected';
+
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <h1 className="dashboard-title" style={{ margin: 0 }}>Class Access Requests</h1>
         
-        {/* Filter Buttons */}
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {['Pending', 'Approved', 'Rejected'].map((tab) => (
+        {/* Filter Buttons & Bulk Actions */}
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          {showCheckbox && selectedIds.length > 0 && (
             <button
-              key={tab}
-              onClick={() => setFilter(tab)}
+              onClick={handleBulkDelete}
               style={{
                 padding: '6px 16px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                background: filter === tab ? '#2563eb' : '#ffffff',
-                color: filter === tab ? '#ffffff' : '#475569',
-                fontWeight: 600,
+                border: 'none',
+                background: '#dc2626',
+                color: '#ffffff',
+                fontWeight: 700,
                 fontSize: '0.875rem',
                 cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)',
                 transition: 'all 0.2s'
               }}
             >
-              {tab}
+              Delete Selected ({selectedIds.length})
             </button>
-          ))}
+          )}
+
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {['Pending', 'Approved', 'Rejected'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #cbd5e1',
+                  background: filter === tab ? '#2563eb' : '#ffffff',
+                  color: filter === tab ? '#ffffff' : '#475569',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -262,6 +329,17 @@ const ClassAccessRequests = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '0.5rem', overflow: 'hidden', border: '1px solid var(--border-gray)' }}>
               <thead style={{ background: 'var(--secondary)', color: 'white' }}>
                 <tr>
+                  {showCheckbox && (
+                    <th style={{ padding: '0.85rem 1rem', width: '40px', textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={requests.length > 0 && selectedIds.length === requests.length}
+                        onChange={handleSelectAll}
+                        style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#2563eb' }}
+                        title="Select All"
+                      />
+                    </th>
+                  )}
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Student Name</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Student Email</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'left' }}>Course</th>
@@ -275,6 +353,16 @@ const ClassAccessRequests = () => {
               <tbody>
                 {requests.map((req) => (
                   <tr key={req._id} style={{ borderBottom: '1px solid var(--border-gray)' }}>
+                    {showCheckbox && (
+                      <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(req._id)}
+                          onChange={() => handleSelectRow(req._id)}
+                          style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#2563eb' }}
+                        />
+                      </td>
+                    )}
                     <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>
                       {req.userId?.name || 'N/A'}
                     </td>

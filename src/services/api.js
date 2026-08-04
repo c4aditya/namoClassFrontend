@@ -43,6 +43,7 @@ export const getAdminClassAccessRequests = (status, search) => API.get('/admin/c
 export const approveClassAccessRequest = (id) => API.patch(`/admin/class-access-request/${id}/approve`);
 export const rejectClassAccessRequest = (id) => API.patch(`/admin/class-access-request/${id}/reject`);
 export const deleteClassAccessRequest = (id) => API.delete(`/admin/class-access-request/${id}`);
+export const bulkDeleteClassAccessRequests = (ids) => API.post('/admin/class-access-requests/bulk-delete', { ids });
 
 // Course APIs
 export const getCourses = () => API.get('/courses/courses');
