@@ -26,20 +26,7 @@ export const createCourse = (formData) => API.post('/courses/create-course', for
 export const addUser = (formData) => API.post('/auth/add-user', formData);
 export const getAllUsers = () => API.get('/auth/users');
 export const updateUserDuration = (id, enrolledMonth) => API.put(`/auth/update-duration/${id}`, { enrolledMonth });
-export const toggleUserInterviewAccess = (id, isGranted) => API.put(`/auth/toggle-interview-access/${id}`, { isGranted });
 export const deleteUser = (id) => API.delete(`/auth/delete-user/${id}`);
-
-// ✅ Interview Classes APIs
-export const getInterviewClasses = () => API.get('/interview-classes');
-export const getAdminInterviewClasses = () => API.get('/interview-classes/admin');
-export const createInterviewClass = (formData) => API.post('/interview-classes', formData);
-export const updateInterviewClass = (id, formData) => API.put(`/interview-classes/${id}`, formData);
-export const deleteInterviewClass = (id) => API.delete(`/interview-classes/${id}`);
-export const requestInterviewAccess = () => API.post('/interview-classes/request-access');
-export const getInterviewAccessStatus = () => API.get('/interview-classes/access-status');
-export const getAdminInterviewAccessRequests = () => API.get('/interview-classes/admin/requests');
-export const approveInterviewAccessRequest = (id) => API.patch(`/interview-classes/admin/request/${id}/approve`);
-export const rejectInterviewAccessRequest = (id) => API.patch(`/interview-classes/admin/request/${id}/reject`);
 
 // ✅ Pause / Resume All Classes
 export const pauseResumeCourses = (isPaused) =>

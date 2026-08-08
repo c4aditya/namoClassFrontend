@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, updateUserDuration, deleteUser, toggleUserInterviewAccess } from '../../services/api';
+import { getAllUsers, updateUserDuration, deleteUser } from '../../services/api';
 import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -41,16 +41,6 @@ const ViewUsers = () => {
     }
   };
 
-  const handleInterviewToggle = async (userId, currentStatus) => {
-    try {
-      const { data } = await toggleUserInterviewAccess(userId, !currentStatus);
-      toast.success(data.message);
-      fetchUsers();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update interview access");
-    }
-  };
-
   const handleDelete = async (userId) => {
     if (window.confirm("Are you sure you want to permanently delete this user? This will also remove their pre-approved email access.")) {
       try {
@@ -89,7 +79,6 @@ const ViewUsers = () => {
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
         <Link to="/admin/view-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/view-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/view-users' ? '#fff' : '#475569' }}>Total Users</Link>
         <Link to="/admin/approve-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/approve-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/approve-users' ? '#fff' : '#475569' }}>Approve Users</Link>
-        <Link to="/admin/interview-classes" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>Interview Classes</Link>
       </div>
 
       <h1 className="dashboard-title">Total Users Directory</h1>
@@ -131,7 +120,6 @@ const ViewUsers = () => {
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Signup Date</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Course Duration</th>
-                <th style={{ padding: '1rem', textAlign: 'center' }}>Interview Access</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Last Watched Class</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>

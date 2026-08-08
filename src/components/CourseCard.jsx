@@ -36,11 +36,11 @@ class VideoErrorBoundary extends React.Component {
   }
 }
 
-const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNextClass: propIsNextClass, isFutureLocked: propIsFutureLocked }) => {
+const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNextClass: propIsNextClass, isFutureLocked: propIsFutureLocked, overrideLabel }) => {
   const isIntro = course?.isIntro !== undefined
     ? course.isIntro
     : (index === 0 && String(course?.duration || '').trim() !== '2' && String(course?.duration || '').trim() !== '2 month' && String(course?.duration || '').trim() !== '2 months');
-  const displayClassLabel = isIntro ? "Intro Class" : `Class ${index}`;
+  const displayClassLabel = overrideLabel || (isIntro ? "Intro Class" : `Class ${index}`);
 
   const isFutureLocked = propIsFutureLocked !== undefined ? propIsFutureLocked : course?.isFutureLocked;
   const isNextClass = propIsNextClass !== undefined ? propIsNextClass : course?.isNextClass;
@@ -477,7 +477,7 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
         >
           <span
             style={{
-              background: isIntro ? "#16a34a" : "#2563eb",
+              background: overrideLabel ? "#7c3aed" : (isIntro ? "#16a34a" : "#2563eb"),
               color: "#ffffff",
               fontSize: "0.75rem",
               padding: "4px 8px",

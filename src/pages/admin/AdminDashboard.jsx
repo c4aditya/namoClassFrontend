@@ -98,9 +98,6 @@ const AdminDashboard = () => {
           <Link to="/admin/view-users" className="btn" style={{ background: '#f3f4f6', color: '#1f2937', textDecoration: 'none', padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
             View Total Users
           </Link>
-          <Link to="/admin/interview-classes" className="btn" style={{ background: '#7c3aed', color: '#ffffff', textDecoration: 'none', fontWeight: 600, padding: '0 1rem', height: '38px', width: 'auto', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}>
-            Interview Classes
-          </Link>
 
           <button
             onClick={handlePauseResume}

@@ -9,7 +9,6 @@ import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
-import InterviewClasses from './pages/InterviewClasses';
 
 
 // Admin Pages
@@ -20,7 +19,6 @@ import CreateCourse from './pages/admin/CreateCourse';
 import AddUser from './pages/admin/AddUser';
 import ViewUsers from './pages/admin/ViewUsers';
 import ClassAccessRequests from './pages/admin/ClassAccessRequests';
-import ManageInterviewClasses from './pages/admin/ManageInterviewClasses';
 
 function App() {
   const dispatch = useDispatch();
@@ -60,16 +58,10 @@ function App() {
             <Route path="/dashboard" element={
               isAuthenticated ? <Dashboard /> : <Navigate to="/login" />
             } />
-            <Route path="/interview-classes" element={
-              isAuthenticated ? <InterviewClasses /> : <Navigate to="/login" />
-            } />
 
             {/* Admin Routes */}
             <Route path="/admin/dashboard" element={
               isAuthenticated && role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" />
-            } />
-            <Route path="/admin/interview-classes" element={
-              isAuthenticated && role === 'admin' ? <ManageInterviewClasses /> : <Navigate to="/login" />
             } />
             <Route path="/admin/class-access-requests" element={
               isAuthenticated && role === 'admin' ? <ClassAccessRequests /> : <Navigate to="/login" />

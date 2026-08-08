@@ -34,12 +34,7 @@ const Navbar = () => {
                 <Link to="/admin/pending-users" className="nav-link">Pending Users</Link>
               </>
             ) : (
-              <>
-                <Link to="/dashboard" className="nav-link">My Courses</Link>
-                <Link to="/interview-classes" className="nav-link">
-                  Interview Class {user?.isInterviewAccessGranted ? '🔓' : (user?.interviewAccessStatus === 'Pending' ? '🔒 (Pending)' : '🔒')}
-                </Link>
-              </>
+              <Link to="/dashboard" className="nav-link">My Courses</Link>
             )}
             <span style={{ fontWeight: 600, color: '#93c5fd' }}>
               {user?.name ? user.name.trim().split(' ')[0] : (user?.email?.split('@')[0] || '')}

@@ -337,6 +337,12 @@ const Dashboard = () => {
                 (c, idx) => !(idx === 0 || idx <= userLastWatched || c.accessStatus === 'Approved')
               );
 
+              // Identify Month 1 courses to determine second-to-last and last Month 1 class IDs
+              const allM1Courses = (courses || list || []).filter(c => String(c?.duration || '').trim() === '1');
+              const m1Count = allM1Courses.length;
+              const secondLastM1Id = m1Count >= 2 ? allM1Courses[m1Count - 2]?._id : null;
+              const lastM1Id = m1Count >= 1 ? allM1Courses[m1Count - 1]?._id : null;
+
               return list.map((course, idx) => {
                 const originalIndex = (courses || []).findIndex(c => c._id === course._id);
                 const index = course.globalIndex !== undefined
@@ -350,6 +356,13 @@ const Dashboard = () => {
                 const isNextClass = course.isNextClass !== undefined ? course.isNextClass : (index === nextClassIndex);
                 const isFutureLocked = course.isFutureLocked !== undefined ? course.isFutureLocked : (nextClassIndex !== -1 && index > nextClassIndex);
 
+                let overrideLabel = null;
+                if (secondLastM1Id && String(course._id) === String(secondLastM1Id)) {
+                  overrideLabel = "Interview 1";
+                } else if (lastM1Id && String(course._id) === String(lastM1Id)) {
+                  overrideLabel = "Interview 2";
+                }
+
                 return (
                   <CourseCard
                     key={course._id}
@@ -359,6 +372,7 @@ const Dashboard = () => {
                     index={index}
                     isNextClass={isNextClass}
                     isFutureLocked={isFutureLocked}
+                    overrideLabel={overrideLabel}
                   />
                 );
               });
