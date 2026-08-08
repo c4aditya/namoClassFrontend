@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, updateUserDuration, deleteUser } from '../../services/api';
+import { getAllUsers, updateUserDuration, deleteUser, toggleUserInterviewAccess } from '../../services/api';
 import { Link, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -35,9 +35,19 @@ const ViewUsers = () => {
     try {
       const { data } = await updateUserDuration(userId, newDuration);
       toast.success(data.message);
-      fetchUsers(); // Refresh list to reflect updated data
+      fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update duration");
+    }
+  };
+
+  const handleInterviewToggle = async (userId, currentStatus) => {
+    try {
+      const { data } = await toggleUserInterviewAccess(userId, !currentStatus);
+      toast.success(data.message);
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update interview access");
     }
   };
 
@@ -46,7 +56,7 @@ const ViewUsers = () => {
       try {
         const { data } = await deleteUser(userId);
         toast.success(data.message);
-        fetchUsers(); // Refresh list
+        fetchUsers();
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to delete user");
       }
@@ -79,6 +89,7 @@ const ViewUsers = () => {
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
         <Link to="/admin/view-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/view-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/view-users' ? '#fff' : '#475569' }}>Total Users</Link>
         <Link to="/admin/approve-users" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: location.pathname === '/admin/approve-users' ? 'var(--primary)' : '#f1f5f9', color: location.pathname === '/admin/approve-users' ? '#fff' : '#475569' }}>Approve Users</Link>
+        <Link to="/admin/interview-classes" style={{ padding: '0.5rem 1rem', borderRadius: '0.375rem', textDecoration: 'none', fontWeight: 600, background: '#f1f5f9', color: '#475569' }}>Interview Classes</Link>
       </div>
 
       <h1 className="dashboard-title">Total Users Directory</h1>
@@ -120,6 +131,7 @@ const ViewUsers = () => {
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Signup Date</th>
                 <th style={{ padding: '1rem', textAlign: 'left' }}>Course Duration</th>
+                <th style={{ padding: '1rem', textAlign: 'center' }}>Interview Access</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Last Watched Class</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
@@ -145,6 +157,25 @@ const ViewUsers = () => {
                       <option value="1 month">1 Month</option>
                       <option value="2 months">2 Months</option>
                     </select>
+                  </td>
+
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                    <button
+                      onClick={() => handleInterviewToggle(user._id, user.isInterviewAccessGranted)}
+                      style={{
+                        background: user.isInterviewAccessGranted ? '#16a34a' : '#cbd5e1',
+                        color: user.isInterviewAccessGranted ? '#ffffff' : '#475569',
+                        border: 'none',
+                        padding: '0.35rem 0.75rem',
+                        borderRadius: '100px',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {user.isInterviewAccessGranted ? '✓ Granted' : 'Grant Access'}
+                    </button>
                   </td>
 
                   <td

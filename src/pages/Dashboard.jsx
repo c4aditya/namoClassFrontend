@@ -1,28 +1,78 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import CourseCard from '../components/CourseCard';
 import { Navigate } from 'react-router-dom';
 import { fetchCourses } from '../redux/authSlice';
+import { getFilteredCourses } from '../services/api';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { user, courses, isAuthenticated } = useSelector((state) => state.auth);
+  const [selectedFilter, setSelectedFilter] = useState('Month 1');
+  const [displayedCourses, setDisplayedCourses] = useState([]);
+  const [filterLoading, setFilterLoading] = useState(true);
 
   useEffect(() => {
     dispatch(fetchCourses());
   }, [dispatch]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFilteredCourses = async () => {
+      setFilterLoading(true);
+      try {
+        let param = '1';
+        if (selectedFilter === 'All') param = 'all';
+        if (selectedFilter === 'Month 1') param = '1';
+        if (selectedFilter === 'Month 2') param = '2';
+
+        const { data } = await getFilteredCourses(param);
+        if (isMounted) {
+          if (data?.success && Array.isArray(data?.courses)) {
+            setDisplayedCourses(data.courses);
+          } else {
+            setDisplayedCourses([]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch filtered courses:", err);
+        if (isMounted) setDisplayedCourses([]);
+      } finally {
+        if (isMounted) setFilterLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      loadFilteredCourses();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedFilter, isAuthenticated]);
+
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
-  if (!courses || courses.length === 0) {
-    return (
-      <div className="container" style={{ paddingTop: '3rem', textAlign: 'center' }}>
-        <p style={{ fontSize: '1.25rem', color: '#64748b' }}>Loading courses...</p>
-      </div>
-    );
-  }
+  const is2MonthUser = user?.enrolledMonth === "2" || user?.enrolledMonth === "2 month" || user?.enrolledMonth === "2 months";
+
+  const month1Courses = (displayedCourses || []).filter(c => String(c?.duration || '').trim() === '1');
+  const month2Courses = (displayedCourses || []).filter(c => String(c?.duration || '').trim() === '2');
+
+  const activeCourses = selectedFilter === 'Month 1' || selectedFilter === '1'
+    ? month1Courses
+    : selectedFilter === 'Month 2' || selectedFilter === '2'
+      ? is2MonthUser
+        ? month2Courses
+        : month1Courses
+      : displayedCourses;
+
+  const handleFilterChange = (newFilter) => {
+    setSelectedFilter(newFilter);
+    setDisplayedCourses([]);
+  };
 
   return (
     <>
@@ -35,7 +85,7 @@ const Dashboard = () => {
             paddingBottom: '3rem',
             color: 'white',
             display: 'flex',
-            justify: 'space-between',
+            justifyContent: 'space-between',
             alignItems: 'center',
             gap: '2rem',
             flexWrap: 'wrap',
@@ -84,17 +134,54 @@ const Dashboard = () => {
 
       <div className="container" style={{ paddingBottom: '3rem' }}>
         <section>
-          <h2 style={{
-            fontSize: '1.5rem',
-            fontWeight: 700,
+          <div style={{
             display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '0.75rem',
+            flexWrap: 'wrap',
+            gap: '1rem',
             marginBottom: '1.5rem'
           }}>
-            <span style={{ width: '6px', height: '32px', background: 'var(--primary)', borderRadius: '100px' }}></span>
-            Your Courses
-          </h2>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              margin: 0
+            }}>
+              <span style={{ width: '6px', height: '32px', background: 'var(--primary)', borderRadius: '100px' }}></span>
+              Your Courses
+            </h2>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label htmlFor="course-duration-filter" style={{ fontSize: '0.9rem', fontWeight: 600, color: '#475569' }}>
+                Filter:
+              </label>
+              <select
+                id="course-duration-filter"
+                value={selectedFilter}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  color: '#0f172a',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  outline: 'none',
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <option value="All">All</option>
+                <option value="Month 1">Month 1</option>
+                <option value="Month 2">Month 2</option>
+              </select>
+            </div>
+          </div>
 
           {(() => {
             const isClassesPaused = Array.isArray(courses) && courses.length > 0 && courses.some(c => c.isPaused === true);
@@ -122,7 +209,6 @@ const Dashboard = () => {
                       border: '1px solid #e2e8f0'
                     }}
                   >
-                    {/* Pause / Holiday Icon */}
                     <div
                       style={{
                         width: '80px',
@@ -212,34 +298,75 @@ const Dashboard = () => {
               );
             }
 
-            return courses.length > 0 ? (
+            if (filterLoading) {
+              return (
+                <div style={{
+                  padding: '3.5rem 1rem',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.85rem',
+                  minHeight: '220px'
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '3px solid #cbd5e1',
+                    borderTopColor: '#2563eb',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite'
+                  }} />
+                  <style>{`
+                    @keyframes spin {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                  `}</style>
+                  <p style={{ fontSize: '0.95rem', color: '#64748b', fontWeight: 600, margin: 0 }}>
+                    Loading courses...
+                  </p>
+                </div>
+              );
+            }
+
+            const renderCourseList = (list) => {
+              const userLastWatched = user?.lastWatchedClass || 0;
+              const nextClassIndex = (courses || []).findIndex(
+                (c, idx) => !(idx === 0 || idx <= userLastWatched || c.accessStatus === 'Approved')
+              );
+
+              return list.map((course, idx) => {
+                const originalIndex = (courses || []).findIndex(c => c._id === course._id);
+                const index = course.globalIndex !== undefined
+                  ? course.globalIndex
+                  : (originalIndex !== -1 ? originalIndex : (String(course.duration).trim() === '2' ? idx + 24 : idx));
+                const accessTime = new Date(user?.approvedAt || user?.createdAt).getTime();
+                const unlockTime = course.unlockTime !== undefined
+                  ? course.unlockTime
+                  : (accessTime + index * 12 * 60 * 60 * 1000);
+                const isLocked = course.isLocked !== undefined ? course.isLocked : (Date.now() < unlockTime);
+                const isNextClass = course.isNextClass !== undefined ? course.isNextClass : (index === nextClassIndex);
+                const isFutureLocked = course.isFutureLocked !== undefined ? course.isFutureLocked : (nextClassIndex !== -1 && index > nextClassIndex);
+
+                return (
+                  <CourseCard
+                    key={course._id}
+                    course={course}
+                    isLocked={isLocked}
+                    unlockTime={unlockTime}
+                    index={index}
+                    isNextClass={isNextClass}
+                    isFutureLocked={isFutureLocked}
+                  />
+                );
+              });
+            };
+
+            return activeCourses.length > 0 ? (
               <div className="course-grid">
-                {(() => {
-                  const userLastWatched = user?.lastWatchedClass || 0;
-                  const nextClassIndex = courses.findIndex(
-                    (c, idx) => !(idx === 0 || idx <= userLastWatched || c.accessStatus === 'Approved')
-                  );
-
-                  return courses.map((course, index) => {
-                    const accessTime = new Date(user?.approvedAt || user?.createdAt).getTime();
-                    const unlockTime = accessTime + index * 12 * 60 * 60 * 1000;
-                    const isLocked = Date.now() < unlockTime;
-                    const isNextClass = course.isNextClass !== undefined ? course.isNextClass : (index === nextClassIndex);
-                    const isFutureLocked = course.isFutureLocked !== undefined ? course.isFutureLocked : (nextClassIndex !== -1 && index > nextClassIndex);
-
-                    return (
-                      <CourseCard
-                        key={course._id}
-                        course={course}
-                        isLocked={isLocked}
-                        unlockTime={unlockTime}
-                        index={index}
-                        isNextClass={isNextClass}
-                        isFutureLocked={isFutureLocked}
-                      />
-                    );
-                  });
-                })()}
+                {renderCourseList(activeCourses)}
               </div>
             ) : (
               <div style={{
@@ -250,9 +377,13 @@ const Dashboard = () => {
                 border: '1px solid #dbeafe'
               }}>
                 <p style={{ fontSize: '1.25rem', color: '#1e40af', fontWeight: 600, marginBottom: '0.5rem' }}>
-                  No courses found yet.
+                  {selectedFilter !== 'All' ? 'No courses found for this filter.' : 'No courses found yet.'}
                 </p>
-                <p style={{ color: '#2563eb' }}>Please wait for admin to update your enrollment or check back later.</p>
+                <p style={{ color: '#2563eb' }}>
+                  {selectedFilter !== 'All'
+                    ? `There are no ${selectedFilter} courses available in your current enrollment.`
+                    : 'Please wait for admin to update your enrollment or check back later.'}
+                </p>
               </div>
             );
           })()}

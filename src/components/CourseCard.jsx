@@ -37,7 +37,9 @@ class VideoErrorBoundary extends React.Component {
 }
 
 const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNextClass: propIsNextClass, isFutureLocked: propIsFutureLocked }) => {
-  const isIntro = index === 0 || course?.isIntro === true;
+  const isIntro = course?.isIntro !== undefined
+    ? course.isIntro
+    : (index === 0 && String(course?.duration || '').trim() !== '2' && String(course?.duration || '').trim() !== '2 month' && String(course?.duration || '').trim() !== '2 months');
   const displayClassLabel = isIntro ? "Intro Class" : `Class ${index}`;
 
   const isFutureLocked = propIsFutureLocked !== undefined ? propIsFutureLocked : course?.isFutureLocked;
