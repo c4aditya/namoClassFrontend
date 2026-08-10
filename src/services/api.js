@@ -26,6 +26,7 @@ export const createCourse = (formData) => API.post('/courses/create-course', for
 export const addUser = (formData) => API.post('/auth/add-user', formData);
 export const getAllUsers = () => API.get('/auth/users');
 export const updateUserDuration = (id, enrolledMonth) => API.put(`/auth/update-duration/${id}`, { enrolledMonth });
+export const adminUpdateUser = (id, userData) => API.put(`/auth/update-user/${id}`, userData);
 export const deleteUser = (id) => API.delete(`/auth/delete-user/${id}`);
 
 // ✅ Pause / Resume All Classes
