@@ -65,6 +65,23 @@ const ViewUsers = () => {
   const count1Month = users.filter(is1MonthUser).length;
   const count2Month = users.filter(is2MonthUser).length;
 
+  const getLastWatchedDisplay = (u) => {
+    if (u.lastWatchedClass === 0) return "Intro Class";
+    if (u.lastWatchedClass !== null && u.lastWatchedClass !== undefined && !isNaN(Number(u.lastWatchedClass)) && Number(u.lastWatchedClass) > 0) {
+      return `Class ${u.lastWatchedClass}`;
+    }
+    if (u.currentClass && u.currentClass !== "None") {
+      return u.currentClass === "Completed" ? "🎉 Completed" : `Class ${u.currentClass}`;
+    }
+    return "None";
+  };
+
+  const isNoClassAttempted = (u) => {
+    return getLastWatchedDisplay(u) === "None";
+  };
+
+  const countNoClass = users.filter(isNoClassAttempted).length;
+
   const handleDurationChange = async (userId, newDuration) => {
     try {
       const { data } = await updateUserDuration(userId, newDuration);
@@ -134,6 +151,7 @@ const ViewUsers = () => {
 
     if (monthFilter === '1 Month') return is1MonthUser(user);
     if (monthFilter === '2 Months') return is2MonthUser(user);
+    if (monthFilter === 'No Class Attempted') return isNoClassAttempted(user);
 
     return true;
   });
@@ -235,6 +253,22 @@ const ViewUsers = () => {
             }}
           >
             2 Month Students ({count2Month})
+          </button>
+          <button
+            onClick={() => { setMonthFilter('No Class Attempted'); setCurrentPage(1); }}
+            style={{
+              padding: '0.45rem 1rem',
+              borderRadius: '0.5rem',
+              border: '1px solid #cbd5e1',
+              background: monthFilter === 'No Class Attempted' ? '#2563eb' : '#ffffff',
+              color: monthFilter === 'No Class Attempted' ? '#ffffff' : '#475569',
+              fontWeight: 600,
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            No Class Attempted ({countNoClass})
           </button>
         </div>
 
