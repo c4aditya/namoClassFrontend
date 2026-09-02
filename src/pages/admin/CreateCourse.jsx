@@ -22,9 +22,20 @@ const CreateCourse = () => {
   const fetchCourses = async () => {
     try {
       setLoadingCourses(true);
-      const { data } = await getAdminAllCourses();
-      if (data?.success) {
-        setCourses(data.courses || []);
+      let res;
+      try {
+        res = await getAdminAllCourses();
+      } catch (errPrimary) {
+        console.warn("Primary admin courses fetch failed, trying alternate route...", errPrimary);
+        try {
+          const { default: API } = await import('../../services/api');
+          res = await API.get('/courses/admin/courses');
+        } catch (errAlt) {
+          console.error("Alternate fetch failed:", errAlt);
+        }
+      }
+      if (res?.data?.success) {
+        setCourses(res.data.courses || []);
       }
     } catch (error) {
       console.error("Failed to fetch admin courses:", error);
