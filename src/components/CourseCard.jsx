@@ -475,21 +475,19 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
             gap: "10px",
           }}
         >
-          {!displayClassLabel?.startsWith("Class ") && (
-            <span
-              style={{
-                background: overrideLabel ? "#7c3aed" : (isIntro ? "#16a34a" : "#2563eb"),
-                color: "#ffffff",
-                fontSize: "0.75rem",
-                padding: "4px 8px",
-                borderRadius: "6px",
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {displayClassLabel}
-            </span>
-          )}
+          <span
+            style={{
+              background: overrideLabel ? "#7c3aed" : (isIntro ? "#16a34a" : "#2563eb"),
+              color: "#ffffff",
+              fontSize: "0.75rem",
+              padding: "4px 8px",
+              borderRadius: "6px",
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {displayClassLabel}
+          </span>
           <h3 className="course-title" style={{ flex: 1 }}>{course?.title}</h3>
 
           <span

@@ -25,6 +25,7 @@ export const approveUser = (id) => API.put(`/auth/approve/${id}`);
 export const createCourse = (formData) => API.post('/courses/create-course', formData);
 export const getAdminAllCourses = () => API.get('/admin/courses');
 export const updateCourse = (id, formData) => API.put(`/admin/course/${id}`, formData);
+export const deleteCourse = (id) => API.delete(`/admin/course/${id}`);
 export const addUser = (formData) => API.post('/auth/add-user', formData);
 export const getAllUsers = () => API.get('/auth/users');
 export const updateUserDuration = (id, enrolledMonth) => API.put(`/auth/update-duration/${id}`, { enrolledMonth });

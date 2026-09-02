@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createCourse, getAdminAllCourses, updateCourse } from '../../services/api';
+import { createCourse, getAdminAllCourses, updateCourse, deleteCourse } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const CreateCourse = () => {
@@ -75,6 +75,23 @@ const CreateCourse = () => {
       videoUrl: '',
       classSequence: ''
     });
+  };
+
+  const handleDeleteClick = async (course) => {
+    const classLabel = getClassLabel(course);
+    if (window.confirm(`Are you sure you want to permanently delete "${course.title}" (${classLabel})? This action cannot be undone.`)) {
+      try {
+        const { data } = await deleteCourse(course._id);
+        toast.success(data?.message || "Class deleted successfully!");
+        if (editingCourse?._id === course._id) {
+          handleCancelEdit();
+        }
+        fetchCourses();
+      } catch (error) {
+        console.error("Failed to delete course:", error);
+        toast.error(error.response?.data?.message || "Failed to delete class");
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -262,14 +279,14 @@ const CreateCourse = () => {
         </div>
       </div>
 
-      {/* Directory of Existing Classes with Edit Action */}
+      {/* Directory of Existing Classes with Edit & Delete Actions */}
       <div style={{ marginTop: '2.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
             📚 All Existing Classes ({courses.length})
           </h2>
           <span style={{ fontSize: '0.875rem', color: '#64748b' }}>
-            Click "Edit Class" to pre-fill details in the form above and save changes.
+            Manage classes, edit pre-filled form, or delete classes.
           </span>
         </div>
 
@@ -285,7 +302,7 @@ const CreateCourse = () => {
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Duration</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Month Level</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Video URL</th>
-                  <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Action</th>
+                  <th style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,24 +342,45 @@ const CreateCourse = () => {
                         ) : 'N/A'}
                       </td>
                       <td style={{ padding: '0.85rem 1rem', textAlign: 'center' }}>
-                        <button
-                          onClick={() => handleEditClick(c)}
-                          style={{
-                            background: isBeingEdited ? '#16a34a' : '#2563eb',
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '0.4rem 0.85rem',
-                            fontSize: '0.85rem',
-                            borderRadius: '0.375rem',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem'
-                          }}
-                        >
-                          {isBeingEdited ? 'Editing...' : '✏️ Edit Class'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                          <button
+                            onClick={() => handleEditClick(c)}
+                            style={{
+                              background: isBeingEdited ? '#16a34a' : '#2563eb',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '0.4rem 0.85rem',
+                              fontSize: '0.85rem',
+                              borderRadius: '0.375rem',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                          >
+                            {isBeingEdited ? 'Editing...' : '✏️ Edit Class'}
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteClick(c)}
+                            style={{
+                              background: '#dc2626',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '0.4rem 0.85rem',
+                              fontSize: '0.85rem',
+                              borderRadius: '0.375rem',
+                              cursor: 'pointer',
+                              fontWeight: 600,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
