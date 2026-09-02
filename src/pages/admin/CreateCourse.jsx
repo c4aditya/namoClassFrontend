@@ -50,6 +50,10 @@ const CreateCourse = () => {
 
   const handleEditClick = (course) => {
     setEditingCourse(course);
+    const num = (course.classNumber !== undefined && course.classNumber !== null && !isNaN(Number(course.classNumber)))
+      ? String(course.classNumber)
+      : (course.globalIndex !== undefined ? String(course.globalIndex) : '');
+
     setFormData({
       title: course.title || '',
       description: course.description || '',
@@ -58,7 +62,7 @@ const CreateCourse = () => {
       duration: course.duration || '',
       month: String(course.month || ''),
       videoUrl: course.videoUrl || '',
-      classSequence: course.globalIndex !== undefined ? String(course.globalIndex) : ''
+      classSequence: num
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -101,7 +105,7 @@ const CreateCourse = () => {
       const payload = {
         ...formData,
         month: Number(formData.month),
-        ...(formData.classSequence !== '' ? { targetSequence: Number(formData.classSequence) } : {})
+        ...(formData.classSequence !== '' ? { classNumber: Number(formData.classSequence), targetSequence: Number(formData.classSequence) } : {})
       };
 
       if (editingCourse) {
@@ -132,8 +136,12 @@ const CreateCourse = () => {
   };
 
   const getClassLabel = (c) => {
-    if (c.globalIndex === 0) return "Intro Class";
-    if (c.globalIndex !== undefined && c.globalIndex !== null) return `Class ${c.globalIndex}`;
+    const num = (c.classNumber !== undefined && c.classNumber !== null && !isNaN(Number(c.classNumber)))
+      ? Number(c.classNumber)
+      : (c.globalIndex !== undefined ? Number(c.globalIndex) : null);
+
+    if (num === 0) return "Intro Class";
+    if (num !== null) return `Class ${num}`;
     return "Class";
   };
 

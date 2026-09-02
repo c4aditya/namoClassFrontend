@@ -40,7 +40,12 @@ const CourseCard = ({ course, isLocked: initialIsLocked, unlockTime, index, isNe
   const isIntro = course?.isIntro !== undefined
     ? course.isIntro
     : (index === 0 && String(course?.duration || '').trim() !== '2' && String(course?.duration || '').trim() !== '2 month' && String(course?.duration || '').trim() !== '2 months');
-  const displayClassLabel = overrideLabel || (isIntro ? "Intro Class" : `Class ${index}`);
+
+  const classNum = (course?.classNumber !== undefined && course?.classNumber !== null && !isNaN(Number(course?.classNumber)))
+    ? Number(course.classNumber)
+    : (course?.globalIndex !== undefined ? Number(course.globalIndex) : index);
+
+  const displayClassLabel = overrideLabel || (isIntro && classNum === 0 ? "Intro Class" : `Class ${classNum}`);
 
   const isFutureLocked = propIsFutureLocked !== undefined ? propIsFutureLocked : course?.isFutureLocked;
   const isNextClass = propIsNextClass !== undefined ? propIsNextClass : course?.isNextClass;
